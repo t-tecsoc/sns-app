@@ -1,0 +1,104 @@
+openapi: 3.1.0
+info:
+  description: SNSアプリ
+  title: sns-app
+  version: "1.0"
+servers:
+- url: /
+tags:
+- name: Users
+paths:
+  /users/{handle_name}:
+    get:
+      description: ""
+      operationId: getUserByHandleName
+      parameters:
+      - explode: false
+        in: path
+        name: handle_name
+        required: true
+        schema: {}
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                Example 1:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    handle_name: tecsoc
+                    display_name: TecSoc
+                    encrypted_email_address: aa
+                    encrypted_password: bb
+              schema:
+                $ref: '#/components/schemas/Users'
+          description: OK
+        "404":
+          description: Not Found
+      summary: Get User Info
+      tags:
+      - Users
+  /users:
+    post:
+      description: ""
+      operationId: postUser
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Example 1:
+                value:
+                  id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  handle_name: tecsoc
+                  display_name: TecSoc
+                  encrypted_email_address: aa
+                  encrypted_password: bb
+            schema:
+              $ref: '#/components/schemas/Users'
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                Example 1:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    handle_name: tecsoc
+                    display_name: TecSoc
+                    encrypted_email_address: aa
+                    encrypted_password: bb
+              schema:
+                $ref: '#/components/schemas/Users'
+          description: Created
+        "400":
+          description: Bad Request
+      summary: Create User
+      tags:
+      - Users
+components:
+  schemas:
+    Users:
+      example:
+        handle_name: ""
+        encrypted_email_address: ""
+        id: ""
+        display_name: ""
+        encrypted_password: ""
+      properties:
+        id:
+          format: uuid
+          writeOnly: true
+        handle_name: {}
+        display_name: {}
+        encrypted_email_address:
+          writeOnly: true
+        encrypted_password:
+          writeOnly: true
+      required:
+      - display_name
+      - encrypted_email_address
+      - encrypted_password
+      - handle_name
+      - id
+      title: Users
