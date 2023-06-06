@@ -1,2 +1,2 @@
 # sns-app
-Next.js + Ruby On RailsによるTwitterとインスタを掛け合わせたようなSNSアプリ
+Next.js + Golang + ginによるTwitterとインスタを掛け合わせたようなSNSアプリ
