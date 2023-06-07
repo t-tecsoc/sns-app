@@ -10,6 +10,7 @@
 package openapi
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,5 +23,21 @@ func GetUserByHandleName(c *gin.Context) {
 
 // PostUser - Create User
 func PostUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+	var user Users
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if Db != nil {
+		log.Printf("not nil")
+	} else {
+		log.Printf("nil")
+	}
+	result := Db.Create(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

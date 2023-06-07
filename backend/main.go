@@ -21,7 +21,9 @@ import (
 func main() {
 	log.Printf("Server started")
 
+	sw.Init()
+
 	router := sw.NewRouter()
 
-	log.Fatal(router.Run(":8080"))
+	defer log.Fatal(router.Run(":8080"))
 }

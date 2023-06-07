@@ -10,14 +10,13 @@
 package openapi
 
 type Users struct {
+	Id string `json:"id"`
 
-	Id *interface{} `json:"id"`
+	HandleName string `json:"handle_name"`
 
-	HandleName *interface{} `json:"handle_name"`
+	DisplayName string `json:"display_name"`
 
-	DisplayName *interface{} `json:"display_name"`
+	EncryptedEmailAddress string `json:"encrypted_email_address"`
 
-	EncryptedEmailAddress *interface{} `json:"encrypted_email_address"`
-
-	EncryptedPassword *interface{} `json:"encrypted_password"`
+	EncryptedPassword string `json:"encrypted_password"`
 }
