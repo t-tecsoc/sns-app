@@ -1,6 +1,0 @@
-package: sns_app
-generate:
-  gin-server: true
-  client: true
-  models: true
-output: sns_app.gen.go
