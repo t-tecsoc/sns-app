@@ -1,9 +1,9 @@
 package main
 
 import (
-	// Replace username with your github username
 	"backend/graph"
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 
@@ -39,14 +39,29 @@ func GinContextToContextMiddleware() gin.HandlerFunc {
 	}
 }
 
+func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
+	ginContext := ctx.Value("GinContextKey")
+	if ginContext == nil {
+		err := fmt.Errorf("could not retrieve gin.Context")
+		return nil, err
+	}
+
+	gc, ok := ginContext.(*gin.Context)
+	if !ok {
+		err := fmt.Errorf("gin.Context has wrong type")
+		return nil, err
+	}
+	return gc, nil
+}
+
 func main() {
 	// Setting up Gin
 	r := gin.Default()
 	r.Use(GinContextToContextMiddleware())
-	r.GET("/", playgroundHandler())
+	r.POST("/query", graphqlHandler())
 
 	if gin.Mode() != gin.ReleaseMode {
-		r.POST("/query", graphqlHandler())
+		r.GET("/", playgroundHandler())
 	}
 
 	r.Run()
