@@ -2,18 +2,103 @@
 
 package model
 
-type NewTodo struct {
-	Text string `json:"text" validate:"required"`
-	Type string `json:"type" validate:"oneof=must optional"`
+import (
+	"time"
+)
+
+type CreatePostInput struct {
+	ID      string `json:"id" validate:"len=36"`
+	Content string `json:"content" validate:"min=1,max=400"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Type string `json:"type"`
+type CreatePostPayload struct {
+	User *Post `json:"user"`
+}
+
+type CreateUserInput struct {
+	ID         string  `json:"id" validate:"len=36"`
+	UserName   string  `json:"user_name"`
+	ScreenName *string `json:"screen_name,omitempty"`
+}
+
+type CreateUserPayload struct {
+	User *User `json:"user"`
+}
+
+type DeletePostInput struct {
+	ID string `json:"id" validate:"len=36"`
+}
+
+type DeletePostPayload struct {
+	Success bool `json:"success"`
+}
+
+type DeleteUserInput struct {
+	ID string `json:"id" validate:"len=36"`
+}
+
+type DeleteUserPayload struct {
+	Success bool `json:"success"`
+}
+
+type PageInfo struct {
+	TotalCount  int  `json:"totalCount"`
+	HasNextPage bool `json:"hasNextPage"`
+}
+
+type Post struct {
+	ID        string    `json:"id" validate:"len=36"`
+	Content   string    `json:"content" validate:"min=1,max=400"`
+	Author    *User     `json:"author"`
+	Likes     []*User   `json:"likes,omitempty"`
+	Retweets  []*User   `json:"retweets,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UpdatePostInput struct {
+	ID      string `json:"id" validate:"len=36"`
+	Content string `json:"content" validate:"min=1,max=400"`
+}
+
+type UpdatePostPaylod struct {
+	User *Post `json:"user"`
+}
+
+type UpdateUserInput struct {
+	ID         string  `json:"id" validate:"len=36"`
+	UserName   *string `json:"user_name,omitempty"`
+	ScreenName *string `json:"screen_name,omitempty"`
+}
+
+type UpdateUserPayload struct {
+	User *User `json:"user"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string  `json:"id" validate:"len=36"`
+	UserName   string  `json:"user_name"`
+	ScreenName string  `json:"screen_name"`
+	Posts      []*Post `json:"posts,omitempty"`
+	Followers  []*User `json:"followers,omitempty"`
+	Following  []*User `json:"following,omitempty"`
+}
+
+type GetPostPayload struct {
+	Data     *Post     `json:"data,omitempty"`
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+type GetPostsPayload struct {
+	Data     []*Post   `json:"data,omitempty"`
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+type GetUserPayload struct {
+	Data     *User     `json:"data,omitempty"`
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+type GetUsersPayload struct {
+	Data     []*User   `json:"data,omitempty"`
+	PageInfo *PageInfo `json:"pageInfo"`
 }
