@@ -42,6 +42,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, format *string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -57,6 +58,7 @@ type ComplexityRoot struct {
 		Done func(childComplexity int) int
 		ID   func(childComplexity int) int
 		Text func(childComplexity int) int
+		Type func(childComplexity int) int
 	}
 
 	User struct {
@@ -126,6 +128,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.Text(childComplexity), true
+
+	case "Todo.type":
+		if e.complexity.Todo.Type == nil {
+			break
+		}
+
+		return e.complexity.Todo.Type(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -266,6 +275,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_constraint_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["format"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["format"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -379,6 +403,8 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
+			case "type":
+				return ec.fieldContext_Todo_type(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
@@ -442,6 +468,8 @@ func (ec *executionContext) fieldContext_Query_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_text(ctx, field)
 			case "done":
 				return ec.fieldContext_Todo_done(ctx, field)
+			case "type":
+				return ec.fieldContext_Todo_type(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
@@ -705,6 +733,50 @@ func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_type(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2578,7 +2650,7 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"text"}
+	fieldsInOrder := [...]string{"text", "type"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -2594,6 +2666,15 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 				return it, err
 			}
 			it.Text = data
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
 		}
 	}
 
@@ -2752,6 +2833,11 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "done":
 			out.Values[i] = ec._Todo_done(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "type":
+			out.Values[i] = ec._Todo_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

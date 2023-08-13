@@ -14,12 +14,18 @@ import (
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	//ランダムな数字の生成
+	// err := validate.Struct(input)
+	// if err != nil {
+	// 	fmt.Println("バリデーションエラー")
+	// 	return nil, err
+	// }
+
 	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := model.Todo{
 		Text: input.Text,
 		ID:   fmt.Sprintf("T%d", rand),
 		Done: false,
+		Type: input.Type,
 	}
 	//ここでのrはresolver.goで宣言したResolver型を示しているそのため、t.todosはresolver.goで先ほど記述したもの
 	r.DB.Create(&todo)

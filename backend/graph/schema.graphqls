@@ -3,7 +3,7 @@
 # https://gqlgen.com/getting-started/
 
 # Format must correspond to A.https://pkg.go.dev/github.com/go-playground/validator/v10
-directive @validation(
+directive @constraint(
 	format: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
@@ -26,7 +26,8 @@ type Query {
 
 input NewTodo {
   text: String!
-  type: String! @validation(format: "oneof=must optional")
+  type: String!
+  # type: String! @validation(format: "oneof=must optional")
   # userId: String!
 }
 
