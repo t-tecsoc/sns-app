@@ -19,11 +19,12 @@ import (
 func graphqlHandler(db *gorm.DB) gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
+
 	h := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
 			graph.Config{
+				// resolver.goで宣言した構造体にデータベースの値を受け渡し
 				Resolvers: &graph.Resolver{
-					// resolver.goで宣言した構造体にデータベースの値を受け渡し
 					DB: db,
 				},
 			},
@@ -78,27 +79,25 @@ func main() {
 		fmt.Printf(".envファイルを読み込み出来ませんでした: %v", err)
 		return
 	}
-	database_url := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Tokyo",
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("HOST_NAME"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DATABASE"),
+		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_PORT"),
 	)
 
-	db := db.ConnectGORM(database_url)
-
-	// resolver内でデータベースを扱えるように設定
+	database := db.ConnectGORM(dsn)
 
 	// Setting up Gin
-	r := gin.Default()
-	r.Use(GinContextToContextMiddleware())
-	r.POST("/query", graphqlHandler(db))
+	router := gin.Default()
+	router.Use(GinContextToContextMiddleware())
+	router.POST("/query", graphqlHandler(database))
 
 	if gin.Mode() != gin.ReleaseMode {
-		r.GET("/", playgroundHandler())
+		router.GET("/", playgroundHandler())
 	}
 
-	r.Run()
+	router.Run()
 }

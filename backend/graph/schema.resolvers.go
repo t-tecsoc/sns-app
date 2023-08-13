@@ -16,19 +16,21 @@ import (
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
 	//ランダムな数字の生成
 	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
-	todo := &model.Todo{
+	todo := model.Todo{
 		Text: input.Text,
 		ID:   fmt.Sprintf("T%d", rand),
 		Done: false,
 	}
 	//ここでのrはresolver.goで宣言したResolver型を示しているそのため、t.todosはresolver.goで先ほど記述したもの
-	r.todos = append(r.todos, todo)
-	return todo, nil
+	r.DB.Create(&todo)
+	return &todo, nil
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	return r.todos, nil
+	todos := []*model.Todo{}
+	r.DB.Find(&todos)
+	return todos, nil
 }
 
 // Mutation returns MutationResolver implementation.
