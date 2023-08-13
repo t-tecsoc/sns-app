@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/99designs/gqlgen v0.17.36
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-playground/validator/v10 v10.15.0
 	github.com/joho/godotenv v1.5.1
 	github.com/vektah/gqlparser/v2 v2.5.8
 	gorm.io/driver/postgres v1.5.2
@@ -20,7 +21,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect

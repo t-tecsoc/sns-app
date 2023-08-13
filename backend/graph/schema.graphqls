@@ -3,16 +3,16 @@
 # https://gqlgen.com/getting-started/
 
 # Format must correspond to A.https://pkg.go.dev/github.com/go-playground/validator/v10
-directive @constraint(
-	format: String
-) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @validation(
+  format: String
+) on INPUT_FIELD_DEFINITION
 
 type Todo {
   id: ID!
   text: String!
-  done: Boolean!
-  type: String!
+  # done: Boolean!
   # user: User!
+  type: String!
 }
 
 type User {
@@ -25,10 +25,9 @@ type Query {
 }
 
 input NewTodo {
-  text: String!
-  type: String!
-  # type: String! @validation(format: "oneof=must optional")
-  # userId: String!
+  text: String! @validation(format: "required")
+  type: String! @validation(format: "oneof=must optional")
+  # repeatEveryDay: RepeatEveryDay
 }
 
 type Mutation {

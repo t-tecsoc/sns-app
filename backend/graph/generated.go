@@ -42,7 +42,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, format *string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -55,7 +54,6 @@ type ComplexityRoot struct {
 	}
 
 	Todo struct {
-		Done func(childComplexity int) int
 		ID   func(childComplexity int) int
 		Text func(childComplexity int) int
 		Type func(childComplexity int) int
@@ -107,13 +105,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
-
-	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
-			break
-		}
-
-		return e.complexity.Todo.Done(childComplexity), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -275,21 +266,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_constraint_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["format"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["format"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -401,8 +377,6 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "type":
 				return ec.fieldContext_Todo_type(ctx, field)
 			}
@@ -466,8 +440,6 @@ func (ec *executionContext) fieldContext_Query_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_id(ctx, field)
 			case "text":
 				return ec.fieldContext_Todo_text(ctx, field)
-			case "done":
-				return ec.fieldContext_Todo_done(ctx, field)
 			case "type":
 				return ec.fieldContext_Todo_type(ctx, field)
 			}
@@ -689,50 +661,6 @@ func (ec *executionContext) fieldContext_Todo_text(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Todo_done(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Done, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Todo_done(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Todo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2828,11 +2756,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "text":
 			out.Values[i] = ec._Todo_text(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "done":
-			out.Values[i] = ec._Todo_done(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
