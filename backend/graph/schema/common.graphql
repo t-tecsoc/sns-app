@@ -1,0 +1,10 @@
+directive @validation(
+  format: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
+
+scalar Time
+
+type PageInfo {
+  totalCount: Int!
+  hasNextPage: Boolean!
+}

@@ -1,0 +1,3 @@
+directive @validation(
+  format: String
+) on INPUT_FIELD_DEFINITION

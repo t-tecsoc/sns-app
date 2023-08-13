@@ -1,0 +1,63 @@
+#import Post from "post.graphql"
+#import PageInfo from "common/pagintion.graphql"
+
+type Post {
+  id: String! @validation(format: "len=36")
+  content: String! @validation(format: "min=1,max=400")
+  author: User!
+  likes: [User!]
+  retweets: [User!]
+  created_at: Time!
+}
+
+input CreatePostInput {
+  id: String! @validation(format: "len=36")
+  content: String! @validation(format: "min=1,max=400")
+}
+
+input UpdatePostInput  {
+  id: String! @validation(format: "len=36")
+  content: String! @validation(format: "min=1,max=400")
+}
+
+input DeletePostInput {
+  id: String! @validation(format: "len=36")
+}
+
+type CreatePostPayload {
+  user: Post!
+}
+type UpdatePostPaylod {
+  user: Post!
+}
+
+type DeletePostPayload {
+  success: Boolean!
+}
+
+extend type Mutation {
+  createPost(input: CreatePostInput!): CreatePostPayload!
+  updatePost(input: UpdatePostInput!): UpdatePostPaylod!
+  deletePost(input: DeletePostInput!): DeletePostPayload!
+}
+
+type getPostsPayload {
+  data: [Post!]
+  pageInfo: PageInfo!
+}
+
+type getPostPayload {
+  data: Post
+  pageInfo: PageInfo!
+}
+
+extend type Query {
+  getPost(id: String! @validation(format: "len=36")): getPostPayload
+
+  getPosts(
+    after: String @validation(format: "len=36")
+    before: String @validation(format: "len=36")
+    first: Int
+    last: Int
+  ): getPostsPayload!
+}

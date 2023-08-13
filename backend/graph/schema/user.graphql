@@ -1,0 +1,68 @@
+#import Post from "post.graphql"
+
+type User {
+  id: String! @validation(format: "len=36")
+  user_name: String!
+  screen_name: String!
+  posts: [Post!]
+  followers: [User!]
+  following: [User!]
+}
+
+input CreateUserInput {
+  id: String! @validation(format: "len=36")
+  user_name: String!
+  screen_name: String
+}
+
+input UpdateUserInput {
+  id: String! @validation(format: "len=36")
+  user_name: String
+  screen_name: String
+}
+
+input DeleteUserInput {
+  id: String! @validation(format: "len=36")
+}
+
+type CreateUserPayload {
+  user: User!
+}
+
+type UpdateUserPayload {
+  user: User!
+}
+
+type DeleteUserPayload {
+  success: Boolean!
+}
+
+extend type Mutation {
+
+  createUser(input: CreateUserInput): CreateUserPayload!
+
+  updateUser(input: UpdateUserInput): UpdateUserPayload!
+
+  deleteUser(input: DeleteUserInput): DeleteUserPayload!
+}
+
+type getUserPayload {
+  data: User
+  pageInfo: PageInfo!
+}
+
+type getUsersPayload {
+  data: [User!]
+  pageInfo: PageInfo!
+}
+
+extend type Query {
+  getUser(id: String! @validation(format: "len=36")) :getUserPayload!
+
+  getUsers(
+    after: String @validation(format: "len=36")
+    before: String! @validation(format: "len=36")
+    first: Int
+    last: Int
+  ): getUsersPayload!
+}
