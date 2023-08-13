@@ -3,6 +3,7 @@ package main
 import (
 	"backend/db"
 	"backend/graph"
+	"backend/graph/resolver"
 	"context"
 	"fmt"
 	"os"
@@ -24,7 +25,7 @@ func graphqlHandler(db *gorm.DB) gin.HandlerFunc {
 		graph.NewExecutableSchema(
 			graph.Config{
 				// resolver.goで宣言した構造体にデータベースの値を受け渡し
-				Resolvers: &graph.Resolver{
+				Resolvers: &resolver.Resolver{
 					DB: db,
 				},
 			},
