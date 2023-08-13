@@ -83,7 +83,7 @@ func main() {
 	}
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		os.Getenv("HOST_NAME"),
+		os.Getenv("POSTGRES_HOST_NAME"),
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB"),
@@ -100,6 +100,6 @@ func main() {
 	if gin.Mode() != gin.ReleaseMode {
 		router.GET("/", playgroundHandler())
 	}
-
-	router.Run(os.Getenv("HOST_NAME"))
+	var addr = fmt.Sprintf("%s:%s", os.Getenv("GIN_HOST_NAME"), os.Getenv("GIN_PORT"))
+	router.Run(addr)
 }
