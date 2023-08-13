@@ -74,7 +74,9 @@ func loadEnv() error {
 }
 
 func main() {
+
 	err := loadEnv()
+
 	if err != nil {
 		fmt.Printf(".envファイルを読み込み出来ませんでした: %v", err)
 		return
@@ -99,5 +101,5 @@ func main() {
 		router.GET("/", playgroundHandler())
 	}
 
-	router.Run()
+	router.Run(os.Getenv("HOST_NAME"))
 }
