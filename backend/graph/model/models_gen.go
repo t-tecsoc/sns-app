@@ -3,14 +3,13 @@
 package model
 
 type NewTodo struct {
-	Text string `json:"text"`
-	Type string `json:"type"`
+	Text string `json:"text" validate:"required"`
+	Type string `json:"type" validate:"oneof=must optional"`
 }
 
 type Todo struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
-	Done bool   `json:"done"`
 	Type string `json:"type"`
 }
 
