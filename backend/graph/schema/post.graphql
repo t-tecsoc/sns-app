@@ -1,6 +1,3 @@
-#import Post from "post.graphql"
-#import PageInfo from "common/pagintion.graphql"
-
 type Post {
   id: String! @validation(format: "len=36")
   content: String! @validation(format: "min=1,max=400")
@@ -43,12 +40,12 @@ extend type Mutation {
 
 type getPostsPayload {
   data: [Post!]
-  pageInfo: PageInfo!
+  pageInfo: CommonPageInfo!
 }
 
 type getPostPayload {
   data: Post
-  pageInfo: PageInfo!
+  pageInfo: CommonPageInfo!
 }
 
 extend type Query {

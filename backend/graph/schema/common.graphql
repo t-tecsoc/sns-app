@@ -4,7 +4,22 @@ directive @validation(
 
 scalar Time
 
-type PageInfo {
+type CommonPageInfo {
   totalCount: Int!
   hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
 }
+
+input ConnectionInput {
+  first: Int
+  after: ID
+  last: Int
+  before: ID
+  limit: Int
+}
+
+type Error {
+  message: String!
+}
+
+union AllError = Error

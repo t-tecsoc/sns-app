@@ -1,40 +1,44 @@
-#import Post from "post.graphql"
-
 type User {
-  id: String! @validation(format: "len=36")
+  id: ID!
   user_name: String!
   screen_name: String!
-  posts: [Post!]
-  followers: [User!]
-  following: [User!]
+  posts: [Post]!
+  followers: [User]!
+  following: [User]!
 }
 
 input CreateUserInput {
-  id: String! @validation(format: "len=36")
-  user_name: String!
-  screen_name: String
+  user_name: String! @validation(format: "min=1,max=30")
+  screen_name: String @validation(format: "min=3,max=15")
 }
 
 input UpdateUserInput {
-  id: String! @validation(format: "len=36")
-  user_name: String
-  screen_name: String
+  user_name: String @validation(format: "min=1,max=30")
+  screen_name: String @validation(format: "min=3,max=15")
 }
 
-input DeleteUserInput {
-  id: String! @validation(format: "len=36")
+input UserIdInput {
+  id: ID!
+}
+
+interface UserPayload {
+  user: User
+  errors: [AllError]!
 }
 
 type CreateUserPayload {
-  user: User!
+  user: User
+  errors: [AllError]!
 }
-
+ 
 type UpdateUserPayload {
-  user: User!
+  user: User
+  errors: [AllError]!
 }
 
 type DeleteUserPayload {
   success: Boolean!
+  errors: [AllError]!
 }
 
 extend type Mutation {
@@ -43,25 +47,25 @@ extend type Mutation {
 
   updateUser(input: UpdateUserInput): UpdateUserPayload!
 
-  deleteUser(input: DeleteUserInput): DeleteUserPayload!
+  deleteUser(input: UserIdInput): DeleteUserPayload!
 }
 
 type getUserPayload {
-  data: User
-  pageInfo: PageInfo!
+  user: User
+  pageInfo: CommonPageInfo!
 }
 
 type getUsersPayload {
-  data: [User!]
-  pageInfo: PageInfo!
+  users: [User]!
+  pageInfo: CommonPageInfo!
 }
 
 extend type Query {
-  getUser(id: String! @validation(format: "len=36")) :getUserPayload!
+  getUser(input: UserIdInput) :getUserPayload!
 
   getUsers(
-    after: String @validation(format: "len=36")
-    before: String! @validation(format: "len=36")
+    after: ID
+    before: ID
     first: Int
     last: Int
   ): getUsersPayload!
