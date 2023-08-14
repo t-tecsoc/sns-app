@@ -1,7 +1,6 @@
 package db
 
 import (
-	"backend/graph/model"
 	"fmt"
 
 	"gorm.io/driver/postgres"
@@ -14,7 +13,7 @@ func ConnectGORM(dsn string) *gorm.DB {
 	if err != nil {
 		panic(err.Error())
 	}
-	db.AutoMigrate(&model.Todo{})
+	// db.AutoMigrate(&model.Todo{})
 	fmt.Println("migrated")
 	return db
 }

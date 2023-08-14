@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func validateInputModel(m any) *gqlerror.Error {
+func ValidateInputModel(m any) *gqlerror.Error {
 	validationErrors, err := validation.ValidateModel(m)
 	if err != nil {
 		return &gqlerror.Error{
