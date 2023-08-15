@@ -43,6 +43,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Validation func(ctx context.Context, obj interface{}, next graphql.Resolver, format string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -675,6 +676,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_validation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["format"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["format"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1802,8 +1818,32 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.ID, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			format, err := ec.unmarshalNString2string(ctx, "len=36")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Validation == nil {
+				return nil, errors.New("directive validation is not implemented")
+			}
+			return ec.directives.Validation(ctx, obj, directive0, format)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1846,8 +1886,32 @@ func (ec *executionContext) _Post_content(ctx context.Context, field graphql.Col
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Content, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Content, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Validation == nil {
+				return nil, errors.New("directive validation is not implemented")
+			}
+			return ec.directives.Validation(ctx, obj, directive0, format)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2717,8 +2781,32 @@ func (ec *executionContext) _User_user_name(ctx context.Context, field graphql.C
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserName, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.UserName, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Validation == nil {
+				return nil, errors.New("directive validation is not implemented")
+			}
+			return ec.directives.Validation(ctx, obj, directive0, format)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5257,20 +5345,54 @@ func (ec *executionContext) unmarshalInputCreatePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "len=36")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.ID = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.ID = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		case "content":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.Content = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Content = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 
@@ -5295,20 +5417,56 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.UserName = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.UserName = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		case "screen_name":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=3,max=15")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.ScreenName = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.ScreenName = data
+			} else if tmp == nil {
+				it.ScreenName = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 
@@ -5333,11 +5491,28 @@ func (ec *executionContext) unmarshalInputDeletePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "len=36")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.ID = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.ID = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 
@@ -5391,20 +5566,54 @@ func (ec *executionContext) unmarshalInputUpdatePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "len=36")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.ID = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.ID = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		case "content":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.Content = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Content = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 
@@ -5429,20 +5638,58 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.UserName = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.UserName = data
+			} else if tmp == nil {
+				it.UserName = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		case "screen_name":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				format, err := ec.unmarshalNString2string(ctx, "min=3,max=15")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Validation == nil {
+					return nil, errors.New("directive validation is not implemented")
+				}
+				return ec.directives.Validation(ctx, obj, directive0, format)
 			}
-			it.ScreenName = data
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.ScreenName = data
+			} else if tmp == nil {
+				it.ScreenName = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 

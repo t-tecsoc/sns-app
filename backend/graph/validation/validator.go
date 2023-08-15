@@ -49,17 +49,15 @@ func msgForTag(fe validator.FieldError) string {
 
 func ValidateModel(model any) (map[string]string, error) {
 	if err := validate.Struct(model); err != nil {
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			return nil, err
-		}
+		e := err.(*validator.InvalidValidationError)
 
-		errs := err.(validator.ValidationErrors)
-		validationErrors := make(map[string]string, len(errs))
-		for _, ve := range errs {
+		errors := err.(validator.ValidationErrors)
+		validationErrors := make(map[string]string, len(errors))
+		for _, ve := range errors {
 			validationErrors[ve.StructNamespace()] = msgForTag(ve)
 		}
 
-		return validationErrors, nil
+		return validationErrors, e
 	}
 	return nil, nil
 }

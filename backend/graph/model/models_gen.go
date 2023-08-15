@@ -105,7 +105,7 @@ type UpdateUserPayload struct {
 
 type User struct {
 	ID         string  `json:"id"`
-	UserName   string  `json:"user_name"`
+	UserName   string  `json:"user_name" validate:"min=1,max=30"`
 	ScreenName string  `json:"screen_name"`
 	Posts      []*Post `json:"posts"`
 	Followers  []*User `json:"followers"`

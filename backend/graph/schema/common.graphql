@@ -1,5 +1,5 @@
 directive @validation(
-  format: String
+  format: String!
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
 
 scalar Time
