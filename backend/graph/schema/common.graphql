@@ -15,7 +15,7 @@ input ConnectionInput {
   after: ID
   last: Int
   before: ID
-  limit: Int
+  limit: Int = 10
 }
 
 type Error {
@@ -23,3 +23,7 @@ type Error {
 }
 
 union AllError = Error
+
+input ModelInputId {
+  id: ID!
+}

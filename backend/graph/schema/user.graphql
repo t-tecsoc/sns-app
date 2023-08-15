@@ -2,9 +2,9 @@ type User {
   id: ID!
   user_name: String!
   screen_name: String!
-  posts: [Post]!
-  followers: [User]!
-  following: [User]!
+  posts: [Post!]!
+  followers: [User!]!
+  followings: [User!]!
 }
 
 input CreateUserInput {
@@ -17,37 +17,33 @@ input UpdateUserInput {
   screen_name: String @validation(format: "min=3,max=15")
 }
 
-input UserIdInput {
-  id: ID!
-}
-
 interface UserPayload {
   user: User
-  errors: [AllError]!
+  errors: [AllError!]
 }
 
 type CreateUserPayload {
   user: User
-  errors: [AllError]!
+  errors: [AllError!]
 }
  
 type UpdateUserPayload {
   user: User
-  errors: [AllError]!
+  errors: [AllError!]
 }
 
 type DeleteUserPayload {
   success: Boolean!
-  errors: [AllError]!
+  errors: [AllError!]
 }
 
 extend type Mutation {
 
-  createUser(input: CreateUserInput): CreateUserPayload!
+  createUser(input: CreateUserInput!): CreateUserPayload!
 
-  updateUser(input: UpdateUserInput): UpdateUserPayload!
+  updateUser(input: UpdateUserInput!): UpdateUserPayload!
 
-  deleteUser(input: UserIdInput): DeleteUserPayload!
+  deleteUser(input: ModelInputId!): DeleteUserPayload!
 }
 
 type getUserPayload {
@@ -61,12 +57,7 @@ type getUsersPayload {
 }
 
 extend type Query {
-  getUser(input: UserIdInput) :getUserPayload!
+  getUser(input: ModelInputId!) :getUserPayload!
 
-  getUsers(
-    after: ID
-    before: ID
-    first: Int
-    last: Int
-  ): getUsersPayload!
+  getUsers(input: ConnectionInput!): getUsersPayload!
 }
