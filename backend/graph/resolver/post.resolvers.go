@@ -22,17 +22,17 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 }
 
 // DeletePost is the resolver for the deletePost field.
-func (r *mutationResolver) DeletePost(ctx context.Context, input model.DeletePostInput) (*model.DeletePostPayload, error) {
+func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInputID) (*model.DeletePostPayload, error) {
 	panic(fmt.Errorf("not implemented: DeletePost - deletePost"))
 }
 
 // GetPost is the resolver for the getPost field.
-func (r *queryResolver) GetPost(ctx context.Context, id string) (*model.GetPostPayload, error) {
+func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error) {
 	panic(fmt.Errorf("not implemented: GetPost - getPost"))
 }
 
 // GetPosts is the resolver for the getPosts field.
-func (r *queryResolver) GetPosts(ctx context.Context, after *string, before *string, first *int, last *int) (*model.GetPostsPayload, error) {
+func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
 	panic(fmt.Errorf("not implemented: GetPosts - getPosts"))
 }
 

@@ -6,23 +6,48 @@ import (
 	"time"
 )
 
+type AllError interface {
+	IsAllError()
+}
+
+type UserPayload interface {
+	IsUserPayload()
+	GetUser() *User
+	GetErrors() []AllError
+}
+
+type CommonPageInfo struct {
+	TotalCount      int  `json:"totalCount"`
+	HasNextPage     bool `json:"hasNextPage"`
+	HasPreviousPage bool `json:"hasPreviousPage"`
+}
+
+type ConnectionInput struct {
+	First  *int    `json:"first,omitempty"`
+	After  *string `json:"after,omitempty"`
+	Last   *int    `json:"last,omitempty"`
+	Before *string `json:"before,omitempty"`
+	Limit  *int    `json:"limit,omitempty"`
+}
+
 type CreatePostInput struct {
 	ID      string `json:"id" validate:"len=36"`
 	Content string `json:"content" validate:"min=1,max=400"`
 }
 
 type CreatePostPayload struct {
-	User *Post `json:"user"`
+	User   *Post      `json:"user"`
+	Errors []AllError `json:"errors,omitempty"`
 }
 
 type CreateUserInput struct {
-	ID         string  `json:"id" validate:"len=36"`
-	UserName   string  `json:"user_name"`
-	ScreenName *string `json:"screen_name,omitempty"`
+	UserName   string  `json:"user_name" validate:"min=1,max=30"`
+	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
 }
 
 type CreateUserPayload struct {
-	User *User `json:"user"`
+	User   *User      `json:"user,omitempty"`
+	Errors []AllError `json:"errors,omitempty"`
 }
 
 type DeletePostInput struct {
@@ -30,28 +55,31 @@ type DeletePostInput struct {
 }
 
 type DeletePostPayload struct {
-	Success bool `json:"success"`
-}
-
-type DeleteUserInput struct {
-	ID string `json:"id" validate:"len=36"`
+	Success bool       `json:"success"`
+	Errors  []AllError `json:"errors"`
 }
 
 type DeleteUserPayload struct {
-	Success bool `json:"success"`
+	Success bool       `json:"success"`
+	Errors  []AllError `json:"errors,omitempty"`
 }
 
-type PageInfo struct {
-	TotalCount  int  `json:"totalCount"`
-	HasNextPage bool `json:"hasNextPage"`
+type Error struct {
+	Message string `json:"message"`
+}
+
+func (Error) IsAllError() {}
+
+type ModelInputID struct {
+	ID string `json:"id"`
 }
 
 type Post struct {
 	ID        string    `json:"id" validate:"len=36"`
 	Content   string    `json:"content" validate:"min=1,max=400"`
 	Author    *User     `json:"author"`
-	Likes     []*User   `json:"likes,omitempty"`
-	Retweets  []*User   `json:"retweets,omitempty"`
+	Likes     []*User   `json:"likes"`
+	Retweets  []*User   `json:"retweets"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -61,44 +89,45 @@ type UpdatePostInput struct {
 }
 
 type UpdatePostPaylod struct {
-	User *Post `json:"user"`
+	User   *Post      `json:"user"`
+	Errors []AllError `json:"errors,omitempty"`
 }
 
 type UpdateUserInput struct {
-	ID         string  `json:"id" validate:"len=36"`
-	UserName   *string `json:"user_name,omitempty"`
-	ScreenName *string `json:"screen_name,omitempty"`
+	UserName   *string `json:"user_name,omitempty" validate:"min=1,max=30"`
+	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
 }
 
 type UpdateUserPayload struct {
-	User *User `json:"user"`
+	User   *User      `json:"user,omitempty"`
+	Errors []AllError `json:"errors,omitempty"`
 }
 
 type User struct {
-	ID         string  `json:"id" validate:"len=36"`
+	ID         string  `json:"id"`
 	UserName   string  `json:"user_name"`
 	ScreenName string  `json:"screen_name"`
-	Posts      []*Post `json:"posts,omitempty"`
-	Followers  []*User `json:"followers,omitempty"`
-	Following  []*User `json:"following,omitempty"`
+	Posts      []*Post `json:"posts"`
+	Followers  []*User `json:"followers"`
+	Followings []*User `json:"followings"`
 }
 
 type GetPostPayload struct {
-	Data     *Post     `json:"data,omitempty"`
-	PageInfo *PageInfo `json:"pageInfo"`
+	Post     *Post           `json:"post,omitempty"`
+	PageInfo *CommonPageInfo `json:"pageInfo"`
 }
 
 type GetPostsPayload struct {
-	Data     []*Post   `json:"data,omitempty"`
-	PageInfo *PageInfo `json:"pageInfo"`
+	Posts    []*Post         `json:"posts,omitempty"`
+	PageInfo *CommonPageInfo `json:"pageInfo"`
 }
 
 type GetUserPayload struct {
-	Data     *User     `json:"data,omitempty"`
-	PageInfo *PageInfo `json:"pageInfo"`
+	User     *User           `json:"user,omitempty"`
+	PageInfo *CommonPageInfo `json:"pageInfo"`
 }
 
 type GetUsersPayload struct {
-	Data     []*User   `json:"data,omitempty"`
-	PageInfo *PageInfo `json:"pageInfo"`
+	Users    []*User         `json:"users"`
+	PageInfo *CommonPageInfo `json:"pageInfo"`
 }

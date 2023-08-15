@@ -46,34 +46,43 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	CommonPageInfo struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		TotalCount      func(childComplexity int) int
+	}
+
 	CreatePostPayload struct {
-		User func(childComplexity int) int
+		Errors func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	CreateUserPayload struct {
-		User func(childComplexity int) int
+		Errors func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	DeletePostPayload struct {
+		Errors  func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
 
 	DeleteUserPayload struct {
+		Errors  func(childComplexity int) int
 		Success func(childComplexity int) int
+	}
+
+	Error struct {
+		Message func(childComplexity int) int
 	}
 
 	Mutation struct {
 		CreatePost func(childComplexity int, input model.CreatePostInput) int
-		CreateUser func(childComplexity int, input *model.CreateUserInput) int
-		DeletePost func(childComplexity int, input model.DeletePostInput) int
-		DeleteUser func(childComplexity int, input *model.DeleteUserInput) int
+		CreateUser func(childComplexity int, input model.CreateUserInput) int
+		DeletePost func(childComplexity int, input model.ModelInputID) int
+		DeleteUser func(childComplexity int, input model.ModelInputID) int
 		UpdatePost func(childComplexity int, input model.UpdatePostInput) int
-		UpdateUser func(childComplexity int, input *model.UpdateUserInput) int
-	}
-
-	PageInfo struct {
-		HasNextPage func(childComplexity int) int
-		TotalCount  func(childComplexity int) int
+		UpdateUser func(childComplexity int, input model.UpdateUserInput) int
 	}
 
 	Post struct {
@@ -86,23 +95,25 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetPost  func(childComplexity int, id string) int
-		GetPosts func(childComplexity int, after *string, before *string, first *int, last *int) int
-		GetUser  func(childComplexity int, id string) int
-		GetUsers func(childComplexity int, after *string, before string, first *int, last *int) int
+		GetPost  func(childComplexity int, input model.ModelInputID) int
+		GetPosts func(childComplexity int, input model.ConnectionInput) int
+		GetUser  func(childComplexity int, input model.ModelInputID) int
+		GetUsers func(childComplexity int, input model.ConnectionInput) int
 	}
 
 	UpdatePostPaylod struct {
-		User func(childComplexity int) int
+		Errors func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	UpdateUserPayload struct {
-		User func(childComplexity int) int
+		Errors func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	User struct {
 		Followers  func(childComplexity int) int
-		Following  func(childComplexity int) int
+		Followings func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Posts      func(childComplexity int) int
 		ScreenName func(childComplexity int) int
@@ -110,39 +121,39 @@ type ComplexityRoot struct {
 	}
 
 	GetPostPayload struct {
-		Data     func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+		Post     func(childComplexity int) int
 	}
 
 	GetPostsPayload struct {
-		Data     func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+		Posts    func(childComplexity int) int
 	}
 
 	GetUserPayload struct {
-		Data     func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+		User     func(childComplexity int) int
 	}
 
 	GetUsersPayload struct {
-		Data     func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+		Users    func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	CreatePost(ctx context.Context, input model.CreatePostInput) (*model.CreatePostPayload, error)
 	UpdatePost(ctx context.Context, input model.UpdatePostInput) (*model.UpdatePostPaylod, error)
-	DeletePost(ctx context.Context, input model.DeletePostInput) (*model.DeletePostPayload, error)
-	CreateUser(ctx context.Context, input *model.CreateUserInput) (*model.CreateUserPayload, error)
-	UpdateUser(ctx context.Context, input *model.UpdateUserInput) (*model.UpdateUserPayload, error)
-	DeleteUser(ctx context.Context, input *model.DeleteUserInput) (*model.DeleteUserPayload, error)
+	DeletePost(ctx context.Context, input model.ModelInputID) (*model.DeletePostPayload, error)
+	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.CreateUserPayload, error)
+	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.UpdateUserPayload, error)
+	DeleteUser(ctx context.Context, input model.ModelInputID) (*model.DeleteUserPayload, error)
 }
 type QueryResolver interface {
-	GetPost(ctx context.Context, id string) (*model.GetPostPayload, error)
-	GetPosts(ctx context.Context, after *string, before *string, first *int, last *int) (*model.GetPostsPayload, error)
-	GetUser(ctx context.Context, id string) (*model.GetUserPayload, error)
-	GetUsers(ctx context.Context, after *string, before string, first *int, last *int) (*model.GetUsersPayload, error)
+	GetPost(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error)
+	GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error)
+	GetUser(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error)
+	GetUsers(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error)
 }
 
 type executableSchema struct {
@@ -160,12 +171,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "CommonPageInfo.hasNextPage":
+		if e.complexity.CommonPageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.CommonPageInfo.HasNextPage(childComplexity), true
+
+	case "CommonPageInfo.hasPreviousPage":
+		if e.complexity.CommonPageInfo.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.CommonPageInfo.HasPreviousPage(childComplexity), true
+
+	case "CommonPageInfo.totalCount":
+		if e.complexity.CommonPageInfo.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CommonPageInfo.TotalCount(childComplexity), true
+
+	case "CreatePostPayload.errors":
+		if e.complexity.CreatePostPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.CreatePostPayload.Errors(childComplexity), true
+
 	case "CreatePostPayload.user":
 		if e.complexity.CreatePostPayload.User == nil {
 			break
 		}
 
 		return e.complexity.CreatePostPayload.User(childComplexity), true
+
+	case "CreateUserPayload.errors":
+		if e.complexity.CreateUserPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.CreateUserPayload.Errors(childComplexity), true
 
 	case "CreateUserPayload.user":
 		if e.complexity.CreateUserPayload.User == nil {
@@ -174,6 +220,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateUserPayload.User(childComplexity), true
 
+	case "DeletePostPayload.errors":
+		if e.complexity.DeletePostPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.DeletePostPayload.Errors(childComplexity), true
+
 	case "DeletePostPayload.success":
 		if e.complexity.DeletePostPayload.Success == nil {
 			break
@@ -181,12 +234,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeletePostPayload.Success(childComplexity), true
 
+	case "DeleteUserPayload.errors":
+		if e.complexity.DeleteUserPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.DeleteUserPayload.Errors(childComplexity), true
+
 	case "DeleteUserPayload.success":
 		if e.complexity.DeleteUserPayload.Success == nil {
 			break
 		}
 
 		return e.complexity.DeleteUserPayload.Success(childComplexity), true
+
+	case "Error.message":
+		if e.complexity.Error.Message == nil {
+			break
+		}
+
+		return e.complexity.Error.Message(childComplexity), true
 
 	case "Mutation.createPost":
 		if e.complexity.Mutation.CreatePost == nil {
@@ -210,7 +277,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(*model.CreateUserInput)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.CreateUserInput)), true
 
 	case "Mutation.deletePost":
 		if e.complexity.Mutation.DeletePost == nil {
@@ -222,7 +289,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeletePost(childComplexity, args["input"].(model.DeletePostInput)), true
+		return e.complexity.Mutation.DeletePost(childComplexity, args["input"].(model.ModelInputID)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -234,7 +301,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(*model.DeleteUserInput)), true
+		return e.complexity.Mutation.DeleteUser(childComplexity, args["input"].(model.ModelInputID)), true
 
 	case "Mutation.updatePost":
 		if e.complexity.Mutation.UpdatePost == nil {
@@ -258,21 +325,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(*model.UpdateUserInput)), true
-
-	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
-
-	case "PageInfo.totalCount":
-		if e.complexity.PageInfo.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.TotalCount(childComplexity), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
 
 	case "Post.author":
 		if e.complexity.Post.Author == nil {
@@ -326,7 +379,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPost(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetPost(childComplexity, args["input"].(model.ModelInputID)), true
 
 	case "Query.getPosts":
 		if e.complexity.Query.GetPosts == nil {
@@ -338,7 +391,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPosts(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int)), true
+		return e.complexity.Query.GetPosts(childComplexity, args["input"].(model.ConnectionInput)), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -350,7 +403,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUser(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetUser(childComplexity, args["input"].(model.ModelInputID)), true
 
 	case "Query.getUsers":
 		if e.complexity.Query.GetUsers == nil {
@@ -362,7 +415,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUsers(childComplexity, args["after"].(*string), args["before"].(string), args["first"].(*int), args["last"].(*int)), true
+		return e.complexity.Query.GetUsers(childComplexity, args["input"].(model.ConnectionInput)), true
+
+	case "UpdatePostPaylod.errors":
+		if e.complexity.UpdatePostPaylod.Errors == nil {
+			break
+		}
+
+		return e.complexity.UpdatePostPaylod.Errors(childComplexity), true
 
 	case "UpdatePostPaylod.user":
 		if e.complexity.UpdatePostPaylod.User == nil {
@@ -370,6 +430,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UpdatePostPaylod.User(childComplexity), true
+
+	case "UpdateUserPayload.errors":
+		if e.complexity.UpdateUserPayload.Errors == nil {
+			break
+		}
+
+		return e.complexity.UpdateUserPayload.Errors(childComplexity), true
 
 	case "UpdateUserPayload.user":
 		if e.complexity.UpdateUserPayload.User == nil {
@@ -385,12 +452,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Followers(childComplexity), true
 
-	case "User.following":
-		if e.complexity.User.Following == nil {
+	case "User.followings":
+		if e.complexity.User.Followings == nil {
 			break
 		}
 
-		return e.complexity.User.Following(childComplexity), true
+		return e.complexity.User.Followings(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -420,13 +487,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.UserName(childComplexity), true
 
-	case "getPostPayload.data":
-		if e.complexity.GetPostPayload.Data == nil {
-			break
-		}
-
-		return e.complexity.GetPostPayload.Data(childComplexity), true
-
 	case "getPostPayload.pageInfo":
 		if e.complexity.GetPostPayload.PageInfo == nil {
 			break
@@ -434,12 +494,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetPostPayload.PageInfo(childComplexity), true
 
-	case "getPostsPayload.data":
-		if e.complexity.GetPostsPayload.Data == nil {
+	case "getPostPayload.post":
+		if e.complexity.GetPostPayload.Post == nil {
 			break
 		}
 
-		return e.complexity.GetPostsPayload.Data(childComplexity), true
+		return e.complexity.GetPostPayload.Post(childComplexity), true
 
 	case "getPostsPayload.pageInfo":
 		if e.complexity.GetPostsPayload.PageInfo == nil {
@@ -448,12 +508,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetPostsPayload.PageInfo(childComplexity), true
 
-	case "getUserPayload.data":
-		if e.complexity.GetUserPayload.Data == nil {
+	case "getPostsPayload.posts":
+		if e.complexity.GetPostsPayload.Posts == nil {
 			break
 		}
 
-		return e.complexity.GetUserPayload.Data(childComplexity), true
+		return e.complexity.GetPostsPayload.Posts(childComplexity), true
 
 	case "getUserPayload.pageInfo":
 		if e.complexity.GetUserPayload.PageInfo == nil {
@@ -462,12 +522,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetUserPayload.PageInfo(childComplexity), true
 
-	case "getUsersPayload.data":
-		if e.complexity.GetUsersPayload.Data == nil {
+	case "getUserPayload.user":
+		if e.complexity.GetUserPayload.User == nil {
 			break
 		}
 
-		return e.complexity.GetUsersPayload.Data(childComplexity), true
+		return e.complexity.GetUserPayload.User(childComplexity), true
 
 	case "getUsersPayload.pageInfo":
 		if e.complexity.GetUsersPayload.PageInfo == nil {
@@ -475,6 +535,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GetUsersPayload.PageInfo(childComplexity), true
+
+	case "getUsersPayload.users":
+		if e.complexity.GetUsersPayload.Users == nil {
+			break
+		}
+
+		return e.complexity.GetUsersPayload.Users(childComplexity), true
 
 	}
 	return 0, false
@@ -484,10 +551,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputConnectionInput,
 		ec.unmarshalInputCreatePostInput,
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputDeletePostInput,
-		ec.unmarshalInputDeleteUserInput,
+		ec.unmarshalInputModelInputId,
 		ec.unmarshalInputUpdatePostInput,
 		ec.unmarshalInputUpdateUserInput,
 	)
@@ -626,10 +694,10 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CreateUserInput
+	var arg0 model.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOCreateUserInput2ᚖbackendᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2backendᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -641,10 +709,10 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deletePost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.DeletePostInput
+	var arg0 model.ModelInputID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeletePostInput2backendᚋgraphᚋmodelᚐDeletePostInput(ctx, tmp)
+		arg0, err = ec.unmarshalNModelInputId2backendᚋgraphᚋmodelᚐModelInputID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -656,10 +724,10 @@ func (ec *executionContext) field_Mutation_deletePost_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.DeleteUserInput
+	var arg0 model.ModelInputID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalODeleteUserInput2ᚖbackendᚋgraphᚋmodelᚐDeleteUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNModelInputId2backendᚋgraphᚋmodelᚐModelInputID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -686,10 +754,10 @@ func (ec *executionContext) field_Mutation_updatePost_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.UpdateUserInput
+	var arg0 model.UpdateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOUpdateUserInput2ᚖbackendᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateUserInput2backendᚋgraphᚋmodelᚐUpdateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -716,114 +784,60 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.ModelInputID
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNModelInputId2backendᚋgraphᚋmodelᚐModelInputID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_getPosts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+	var arg0 model.ConnectionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["after"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["before"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["before"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["last"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["last"] = arg3
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.ModelInputID
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNModelInputId2backendᚋgraphᚋmodelᚐModelInputID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Query_getUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["after"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+	var arg0 model.ConnectionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["after"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["before"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["before"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["last"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["last"] = arg3
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -864,6 +878,138 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _CommonPageInfo_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CommonPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CommonPageInfo_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CommonPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CommonPageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.CommonPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CommonPageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CommonPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CommonPageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.CommonPageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPreviousPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CommonPageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CommonPageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _CreatePostPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CreatePostPayload_user(ctx, field)
@@ -923,6 +1069,47 @@ func (ec *executionContext) fieldContext_CreatePostPayload_user(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _CreatePostPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatePostPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreatePostPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreatePostPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CreateUserPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CreateUserPayload_user(ctx, field)
 	if err != nil {
@@ -944,14 +1131,11 @@ func (ec *executionContext) _CreateUserPayload_user(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CreateUserPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -972,10 +1156,51 @@ func (ec *executionContext) fieldContext_CreateUserPayload_user(ctx context.Cont
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CreateUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreateUserPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreateUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreateUserPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1025,6 +1250,50 @@ func (ec *executionContext) fieldContext_DeletePostPayload_success(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _DeletePostPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.DeletePostPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeletePostPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalNAllError2ᚕbackendᚋgraphᚋmodelᚐAllError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeletePostPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeletePostPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _DeleteUserPayload_success(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUserPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DeleteUserPayload_success(ctx, field)
 	if err != nil {
@@ -1064,6 +1333,91 @@ func (ec *executionContext) fieldContext_DeleteUserPayload_success(ctx context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUserPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUserPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Error_message(ctx context.Context, field graphql.CollectedField, obj *model.Error) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Error_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Error_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Error",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1110,6 +1464,8 @@ func (ec *executionContext) fieldContext_Mutation_createPost(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_CreatePostPayload_user(ctx, field)
+			case "errors":
+				return ec.fieldContext_CreatePostPayload_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CreatePostPayload", field.Name)
 		},
@@ -1169,6 +1525,8 @@ func (ec *executionContext) fieldContext_Mutation_updatePost(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_UpdatePostPaylod_user(ctx, field)
+			case "errors":
+				return ec.fieldContext_UpdatePostPaylod_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UpdatePostPaylod", field.Name)
 		},
@@ -1201,7 +1559,7 @@ func (ec *executionContext) _Mutation_deletePost(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeletePost(rctx, fc.Args["input"].(model.DeletePostInput))
+		return ec.resolvers.Mutation().DeletePost(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1228,6 +1586,8 @@ func (ec *executionContext) fieldContext_Mutation_deletePost(ctx context.Context
 			switch field.Name {
 			case "success":
 				return ec.fieldContext_DeletePostPayload_success(ctx, field)
+			case "errors":
+				return ec.fieldContext_DeletePostPayload_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DeletePostPayload", field.Name)
 		},
@@ -1260,7 +1620,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(*model.CreateUserInput))
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(model.CreateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1287,6 +1647,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_CreateUserPayload_user(ctx, field)
+			case "errors":
+				return ec.fieldContext_CreateUserPayload_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CreateUserPayload", field.Name)
 		},
@@ -1319,7 +1681,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(*model.UpdateUserInput))
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.UpdateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1346,6 +1708,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_UpdateUserPayload_user(ctx, field)
+			case "errors":
+				return ec.fieldContext_UpdateUserPayload_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UpdateUserPayload", field.Name)
 		},
@@ -1378,7 +1742,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUser(rctx, fc.Args["input"].(*model.DeleteUserInput))
+		return ec.resolvers.Mutation().DeleteUser(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1405,6 +1769,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 			switch field.Name {
 			case "success":
 				return ec.fieldContext_DeleteUserPayload_success(ctx, field)
+			case "errors":
+				return ec.fieldContext_DeleteUserPayload_errors(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DeleteUserPayload", field.Name)
 		},
@@ -1419,94 +1785,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 	if fc.Args, err = ec.field_Mutation_deleteUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PageInfo_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PageInfo_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PageInfo_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PageInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.HasNextPage, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PageInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
 	}
 	return fc, nil
 }
@@ -1539,7 +1817,7 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Post_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1549,7 +1827,7 @@ func (ec *executionContext) fieldContext_Post_id(ctx context.Context, field grap
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1648,8 +1926,8 @@ func (ec *executionContext) fieldContext_Post_author(ctx context.Context, field 
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1678,11 +1956,14 @@ func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Post_likes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1703,8 +1984,8 @@ func (ec *executionContext) fieldContext_Post_likes(ctx context.Context, field g
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1733,11 +2014,14 @@ func (ec *executionContext) _Post_retweets(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Post_retweets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1758,8 +2042,8 @@ func (ec *executionContext) fieldContext_Post_retweets(ctx context.Context, fiel
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1825,7 +2109,7 @@ func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPost(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().GetPost(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1847,8 +2131,8 @@ func (ec *executionContext) fieldContext_Query_getPost(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "data":
-				return ec.fieldContext_getPostPayload_data(ctx, field)
+			case "post":
+				return ec.fieldContext_getPostPayload_post(ctx, field)
 			case "pageInfo":
 				return ec.fieldContext_getPostPayload_pageInfo(ctx, field)
 			}
@@ -1883,7 +2167,7 @@ func (ec *executionContext) _Query_getPosts(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPosts(rctx, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int))
+		return ec.resolvers.Query().GetPosts(rctx, fc.Args["input"].(model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1908,8 +2192,8 @@ func (ec *executionContext) fieldContext_Query_getPosts(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "data":
-				return ec.fieldContext_getPostsPayload_data(ctx, field)
+			case "posts":
+				return ec.fieldContext_getPostsPayload_posts(ctx, field)
 			case "pageInfo":
 				return ec.fieldContext_getPostsPayload_pageInfo(ctx, field)
 			}
@@ -1944,7 +2228,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUser(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().GetUser(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1969,8 +2253,8 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "data":
-				return ec.fieldContext_getUserPayload_data(ctx, field)
+			case "user":
+				return ec.fieldContext_getUserPayload_user(ctx, field)
 			case "pageInfo":
 				return ec.fieldContext_getUserPayload_pageInfo(ctx, field)
 			}
@@ -2005,7 +2289,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUsers(rctx, fc.Args["after"].(*string), fc.Args["before"].(string), fc.Args["first"].(*int), fc.Args["last"].(*int))
+		return ec.resolvers.Query().GetUsers(rctx, fc.Args["input"].(model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2030,8 +2314,8 @@ func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "data":
-				return ec.fieldContext_getUsersPayload_data(ctx, field)
+			case "users":
+				return ec.fieldContext_getUsersPayload_users(ctx, field)
 			case "pageInfo":
 				return ec.fieldContext_getUsersPayload_pageInfo(ctx, field)
 			}
@@ -2239,6 +2523,47 @@ func (ec *executionContext) fieldContext_UpdatePostPaylod_user(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _UpdatePostPaylod_errors(ctx context.Context, field graphql.CollectedField, obj *model.UpdatePostPaylod) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatePostPaylod_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdatePostPaylod_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdatePostPaylod",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UpdateUserPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUserPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UpdateUserPayload_user(ctx, field)
 	if err != nil {
@@ -2260,14 +2585,11 @@ func (ec *executionContext) _UpdateUserPayload_user(ctx context.Context, field g
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UpdateUserPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2288,10 +2610,51 @@ func (ec *executionContext) fieldContext_UpdateUserPayload_user(ctx context.Cont
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUserPayload_errors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Errors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.AllError)
+	fc.Result = res
+	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUserPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AllError does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2325,7 +2688,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2335,7 +2698,7 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2450,11 +2813,14 @@ func (ec *executionContext) _User_posts(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Post)
 	fc.Result = res
-	return ec.marshalOPost2ᚕᚖbackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
+	return ec.marshalNPost2ᚕᚖbackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_posts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2505,11 +2871,14 @@ func (ec *executionContext) _User_followers(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_followers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2530,8 +2899,8 @@ func (ec *executionContext) fieldContext_User_followers(ctx context.Context, fie
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2539,8 +2908,8 @@ func (ec *executionContext) fieldContext_User_followers(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_following(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_following(ctx, field)
+func (ec *executionContext) _User_followings(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_followings(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2553,21 +2922,24 @@ func (ec *executionContext) _User_following(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Following, nil
+		return obj.Followings, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_following(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_followings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -2585,8 +2957,8 @@ func (ec *executionContext) fieldContext_User_following(ctx context.Context, fie
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -4363,8 +4735,8 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _getPostPayload_data(ctx context.Context, field graphql.CollectedField, obj *model.GetPostPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_getPostPayload_data(ctx, field)
+func (ec *executionContext) _getPostPayload_post(ctx context.Context, field graphql.CollectedField, obj *model.GetPostPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_getPostPayload_post(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4377,7 +4749,7 @@ func (ec *executionContext) _getPostPayload_data(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
+		return obj.Post, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4391,7 +4763,7 @@ func (ec *executionContext) _getPostPayload_data(ctx context.Context, field grap
 	return ec.marshalOPost2ᚖbackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_getPostPayload_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_getPostPayload_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "getPostPayload",
 		Field:      field,
@@ -4444,9 +4816,9 @@ func (ec *executionContext) _getPostPayload_pageInfo(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PageInfo)
+	res := resTmp.(*model.CommonPageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖbackendᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_getPostPayload_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4458,18 +4830,20 @@ func (ec *executionContext) fieldContext_getPostPayload_pageInfo(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "totalCount":
-				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CommonPageInfo", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _getPostsPayload_data(ctx context.Context, field graphql.CollectedField, obj *model.GetPostsPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_getPostsPayload_data(ctx, field)
+func (ec *executionContext) _getPostsPayload_posts(ctx context.Context, field graphql.CollectedField, obj *model.GetPostsPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_getPostsPayload_posts(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4482,7 +4856,7 @@ func (ec *executionContext) _getPostsPayload_data(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
+		return obj.Posts, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4496,7 +4870,7 @@ func (ec *executionContext) _getPostsPayload_data(ctx context.Context, field gra
 	return ec.marshalOPost2ᚕᚖbackendᚋgraphᚋmodelᚐPostᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_getPostsPayload_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_getPostsPayload_posts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "getPostsPayload",
 		Field:      field,
@@ -4549,9 +4923,9 @@ func (ec *executionContext) _getPostsPayload_pageInfo(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PageInfo)
+	res := resTmp.(*model.CommonPageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖbackendᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_getPostsPayload_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4563,18 +4937,20 @@ func (ec *executionContext) fieldContext_getPostsPayload_pageInfo(ctx context.Co
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "totalCount":
-				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CommonPageInfo", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _getUserPayload_data(ctx context.Context, field graphql.CollectedField, obj *model.GetUserPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_getUserPayload_data(ctx, field)
+func (ec *executionContext) _getUserPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.GetUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_getUserPayload_user(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4587,7 +4963,7 @@ func (ec *executionContext) _getUserPayload_data(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
+		return obj.User, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4601,7 +4977,7 @@ func (ec *executionContext) _getUserPayload_data(ctx context.Context, field grap
 	return ec.marshalOUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_getUserPayload_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_getUserPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "getUserPayload",
 		Field:      field,
@@ -4619,8 +4995,8 @@ func (ec *executionContext) fieldContext_getUserPayload_data(ctx context.Context
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -4654,9 +5030,9 @@ func (ec *executionContext) _getUserPayload_pageInfo(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PageInfo)
+	res := resTmp.(*model.CommonPageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖbackendᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_getUserPayload_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4668,18 +5044,20 @@ func (ec *executionContext) fieldContext_getUserPayload_pageInfo(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "totalCount":
-				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CommonPageInfo", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _getUsersPayload_data(ctx context.Context, field graphql.CollectedField, obj *model.GetUsersPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_getUsersPayload_data(ctx, field)
+func (ec *executionContext) _getUsersPayload_users(ctx context.Context, field graphql.CollectedField, obj *model.GetUsersPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_getUsersPayload_users(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4692,21 +5070,24 @@ func (ec *executionContext) _getUsersPayload_data(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
+		return obj.Users, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_getUsersPayload_data(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_getUsersPayload_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "getUsersPayload",
 		Field:      field,
@@ -4724,8 +5105,8 @@ func (ec *executionContext) fieldContext_getUsersPayload_data(ctx context.Contex
 				return ec.fieldContext_User_posts(ctx, field)
 			case "followers":
 				return ec.fieldContext_User_followers(ctx, field)
-			case "following":
-				return ec.fieldContext_User_following(ctx, field)
+			case "followings":
+				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -4759,9 +5140,9 @@ func (ec *executionContext) _getUsersPayload_pageInfo(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PageInfo)
+	res := resTmp.(*model.CommonPageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖbackendᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_getUsersPayload_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4773,11 +5154,13 @@ func (ec *executionContext) fieldContext_getUsersPayload_pageInfo(ctx context.Co
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "totalCount":
-				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CommonPageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -4786,6 +5169,75 @@ func (ec *executionContext) fieldContext_getUsersPayload_pageInfo(ctx context.Co
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputConnectionInput(ctx context.Context, obj interface{}) (model.ConnectionInput, error) {
+	var it model.ConnectionInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["limit"]; !present {
+		asMap["limit"] = 10
+	}
+
+	fieldsInOrder := [...]string{"first", "after", "last", "before", "limit"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "first":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.First = data
+		case "after":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.After = data
+		case "last":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Last = data
+		case "before":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Before = data
+		case "limit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		}
+	}
+
+	return it, nil
+}
 
 func (ec *executionContext) unmarshalInputCreatePostInput(ctx context.Context, obj interface{}) (model.CreatePostInput, error) {
 	var it model.CreatePostInput
@@ -4805,7 +5257,7 @@ func (ec *executionContext) unmarshalInputCreatePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4832,22 +5284,13 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "user_name", "screen_name"}
+	fieldsInOrder := [...]string{"user_name", "screen_name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
 		case "user_name":
 			var err error
 
@@ -4890,7 +5333,7 @@ func (ec *executionContext) unmarshalInputDeletePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4901,8 +5344,8 @@ func (ec *executionContext) unmarshalInputDeletePostInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputDeleteUserInput(ctx context.Context, obj interface{}) (model.DeleteUserInput, error) {
-	var it model.DeleteUserInput
+func (ec *executionContext) unmarshalInputModelInputId(ctx context.Context, obj interface{}) (model.ModelInputID, error) {
+	var it model.ModelInputID
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -4919,7 +5362,7 @@ func (ec *executionContext) unmarshalInputDeleteUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4948,7 +5391,7 @@ func (ec *executionContext) unmarshalInputUpdatePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4975,22 +5418,13 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "user_name", "screen_name"}
+	fieldsInOrder := [...]string{"user_name", "screen_name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
 		case "user_name":
 			var err error
 
@@ -5019,9 +5453,83 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _AllError(ctx context.Context, sel ast.SelectionSet, obj model.AllError) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Error:
+		return ec._Error(ctx, sel, &obj)
+	case *model.Error:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Error(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _UserPayload(ctx context.Context, sel ast.SelectionSet, obj model.UserPayload) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var commonPageInfoImplementors = []string{"CommonPageInfo"}
+
+func (ec *executionContext) _CommonPageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.CommonPageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, commonPageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CommonPageInfo")
+		case "totalCount":
+			out.Values[i] = ec._CommonPageInfo_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._CommonPageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasPreviousPage":
+			out.Values[i] = ec._CommonPageInfo_hasPreviousPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var createPostPayloadImplementors = []string{"CreatePostPayload"}
 
@@ -5039,6 +5547,8 @@ func (ec *executionContext) _CreatePostPayload(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "errors":
+			out.Values[i] = ec._CreatePostPayload_errors(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5075,9 +5585,8 @@ func (ec *executionContext) _CreateUserPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("CreateUserPayload")
 		case "user":
 			out.Values[i] = ec._CreateUserPayload_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "errors":
+			out.Values[i] = ec._CreateUserPayload_errors(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5117,6 +5626,11 @@ func (ec *executionContext) _DeletePostPayload(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "errors":
+			out.Values[i] = ec._DeletePostPayload_errors(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5153,6 +5667,47 @@ func (ec *executionContext) _DeleteUserPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("DeleteUserPayload")
 		case "success":
 			out.Values[i] = ec._DeleteUserPayload_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "errors":
+			out.Values[i] = ec._DeleteUserPayload_errors(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var errorImplementors = []string{"Error", "AllError"}
+
+func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, obj *model.Error) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, errorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Error")
+		case "message":
+			out.Values[i] = ec._Error_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5263,50 +5818,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var pageInfoImplementors = []string{"PageInfo"}
-
-func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("PageInfo")
-		case "totalCount":
-			out.Values[i] = ec._PageInfo_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "hasNextPage":
-			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var postImplementors = []string{"Post"}
 
 func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *model.Post) graphql.Marshaler {
@@ -5335,8 +5846,14 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "likes":
 			out.Values[i] = ec._Post_likes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "retweets":
 			out.Values[i] = ec._Post_retweets(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "created_at":
 			out.Values[i] = ec._Post_created_at(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5516,6 +6033,8 @@ func (ec *executionContext) _UpdatePostPaylod(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "errors":
+			out.Values[i] = ec._UpdatePostPaylod_errors(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5552,9 +6071,8 @@ func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("UpdateUserPayload")
 		case "user":
 			out.Values[i] = ec._UpdateUserPayload_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "errors":
+			out.Values[i] = ec._UpdateUserPayload_errors(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5606,10 +6124,19 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "posts":
 			out.Values[i] = ec._User_posts(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "followers":
 			out.Values[i] = ec._User_followers(ctx, field, obj)
-		case "following":
-			out.Values[i] = ec._User_following(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "followings":
+			out.Values[i] = ec._User_followings(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5966,8 +6493,8 @@ func (ec *executionContext) _getPostPayload(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("getPostPayload")
-		case "data":
-			out.Values[i] = ec._getPostPayload_data(ctx, field, obj)
+		case "post":
+			out.Values[i] = ec._getPostPayload_post(ctx, field, obj)
 		case "pageInfo":
 			out.Values[i] = ec._getPostPayload_pageInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6007,8 +6534,8 @@ func (ec *executionContext) _getPostsPayload(ctx context.Context, sel ast.Select
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("getPostsPayload")
-		case "data":
-			out.Values[i] = ec._getPostsPayload_data(ctx, field, obj)
+		case "posts":
+			out.Values[i] = ec._getPostsPayload_posts(ctx, field, obj)
 		case "pageInfo":
 			out.Values[i] = ec._getPostsPayload_pageInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6048,8 +6575,8 @@ func (ec *executionContext) _getUserPayload(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("getUserPayload")
-		case "data":
-			out.Values[i] = ec._getUserPayload_data(ctx, field, obj)
+		case "user":
+			out.Values[i] = ec._getUserPayload_user(ctx, field, obj)
 		case "pageInfo":
 			out.Values[i] = ec._getUserPayload_pageInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6089,8 +6616,11 @@ func (ec *executionContext) _getUsersPayload(ctx context.Context, sel ast.Select
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("getUsersPayload")
-		case "data":
-			out.Values[i] = ec._getUsersPayload_data(ctx, field, obj)
+		case "users":
+			out.Values[i] = ec._getUsersPayload_users(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "pageInfo":
 			out.Values[i] = ec._getUsersPayload_pageInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6123,6 +6653,54 @@ func (ec *executionContext) _getUsersPayload(ctx context.Context, sel ast.Select
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAllError2backendᚋgraphᚋmodelᚐAllError(ctx context.Context, sel ast.SelectionSet, v model.AllError) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AllError(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAllError2ᚕbackendᚋgraphᚋmodelᚐAllError(ctx context.Context, sel ast.SelectionSet, v []model.AllError) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOAllError2backendᚋgraphᚋmodelᚐAllError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6136,6 +6714,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.CommonPageInfo) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CommonPageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx context.Context, v interface{}) (model.ConnectionInput, error) {
+	res, err := ec.unmarshalInputConnectionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNCreatePostInput2backendᚋgraphᚋmodelᚐCreatePostInput(ctx context.Context, v interface{}) (model.CreatePostInput, error) {
@@ -6157,6 +6750,11 @@ func (ec *executionContext) marshalNCreatePostPayload2ᚖbackendᚋgraphᚋmodel
 	return ec._CreatePostPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCreateUserInput2backendᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
+	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNCreateUserPayload2backendᚋgraphᚋmodelᚐCreateUserPayload(ctx context.Context, sel ast.SelectionSet, v model.CreateUserPayload) graphql.Marshaler {
 	return ec._CreateUserPayload(ctx, sel, &v)
 }
@@ -6169,11 +6767,6 @@ func (ec *executionContext) marshalNCreateUserPayload2ᚖbackendᚋgraphᚋmodel
 		return graphql.Null
 	}
 	return ec._CreateUserPayload(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNDeletePostInput2backendᚋgraphᚋmodelᚐDeletePostInput(ctx context.Context, v interface{}) (model.DeletePostInput, error) {
-	res, err := ec.unmarshalInputDeletePostInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNDeletePostPayload2backendᚋgraphᚋmodelᚐDeletePostPayload(ctx context.Context, sel ast.SelectionSet, v model.DeletePostPayload) graphql.Marshaler {
@@ -6204,6 +6797,21 @@ func (ec *executionContext) marshalNDeleteUserPayload2ᚖbackendᚋgraphᚋmodel
 	return ec._DeleteUserPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6219,14 +6827,53 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPageInfo2ᚖbackendᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
+func (ec *executionContext) unmarshalNModelInputId2backendᚋgraphᚋmodelᚐModelInputID(ctx context.Context, v interface{}) (model.ModelInputID, error) {
+	res, err := ec.unmarshalInputModelInputId(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPost2ᚕᚖbackendᚋgraphᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
 	}
-	return ec._PageInfo(ctx, sel, v)
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPost2ᚖbackendᚋgraphᚋmodelᚐPost(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNPost2ᚖbackendᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v *model.Post) graphql.Marshaler {
@@ -6288,6 +6935,11 @@ func (ec *executionContext) marshalNUpdatePostPaylod2ᚖbackendᚋgraphᚋmodel�
 	return ec._UpdatePostPaylod(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNUpdateUserInput2backendᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v interface{}) (model.UpdateUserInput, error) {
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNUpdateUserPayload2backendᚋgraphᚋmodelᚐUpdateUserPayload(ctx context.Context, sel ast.SelectionSet, v model.UpdateUserPayload) graphql.Marshaler {
 	return ec._UpdateUserPayload(ctx, sel, &v)
 }
@@ -6300,6 +6952,88 @@ func (ec *executionContext) marshalNUpdateUserPayload2ᚖbackendᚋgraphᚋmodel
 		return graphql.Null
 	}
 	return ec._UpdateUserPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
@@ -6607,6 +7341,60 @@ func (ec *executionContext) marshalNgetUsersPayload2ᚖbackendᚋgraphᚋmodel�
 	return ec._getUsersPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOAllError2backendᚋgraphᚋmodelᚐAllError(ctx context.Context, sel ast.SelectionSet, v model.AllError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AllError(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []model.AllError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAllError2backendᚋgraphᚋmodelᚐAllError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6633,20 +7421,20 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOCreateUserInput2ᚖbackendᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (*model.CreateUserInput, error) {
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
+	res, err := graphql.UnmarshalID(v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalODeleteUserInput2ᚖbackendᚋgraphᚋmodelᚐDeleteUserInput(ctx context.Context, v interface{}) (*model.DeleteUserInput, error) {
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
-		return nil, nil
+		return graphql.Null
 	}
-	res, err := ec.unmarshalInputDeleteUserInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	res := graphql.MarshalID(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
@@ -6733,61 +7521,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOUpdateUserInput2ᚖbackendᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v interface{}) (*model.UpdateUserInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalOUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

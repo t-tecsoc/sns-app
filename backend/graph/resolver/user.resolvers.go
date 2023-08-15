@@ -6,31 +6,64 @@ package resolver
 
 import (
 	"backend/graph/model"
+	"backend/module"
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input *model.CreateUserInput) (*model.CreateUserPayload, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.CreateUserPayload, error) {
+	id := uuid.New().String()
+	if input.ScreenName == nil {
+		rG := module.GenerateRandom{}
+		rG.Init()
+		screenName := rG.GetAlphanumberic(rG.GetRandom(15, 3))
+		input.ScreenName = &screenName
+	}
+
+	user := model.User{
+		ID:         id,
+		UserName:   input.UserName,
+		ScreenName: *input.ScreenName,
+		Posts:      []*model.Post{},
+		Followers:  []*model.User{},
+		Followings: []*model.User{},
+	}
+
+	if err := r.DB.Create(&user).Error; err == nil {
+		return &model.CreateUserPayload{
+			User: &model.User{},
+			Errors: []model.AllError{
+				model.Error{
+					Message: err.Error(),
+				},
+			},
+		}, nil
+	}
+	return &model.CreateUserPayload{
+		User:   &user,
+		Errors: []model.AllError{},
+	}, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, input *model.UpdateUserInput) (*model.UpdateUserPayload, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.UpdateUserPayload, error) {
 	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, input *model.DeleteUserInput) (*model.DeleteUserPayload, error) {
+func (r *mutationResolver) DeleteUser(ctx context.Context, input model.ModelInputID) (*model.DeleteUserPayload, error) {
 	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.GetUserPayload, error) {
+func (r *queryResolver) GetUser(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error) {
 	panic(fmt.Errorf("not implemented: GetUser - getUser"))
 }
 
 // GetUsers is the resolver for the getUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context, after *string, before string, first *int, last *int) (*model.GetUsersPayload, error) {
+func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error) {
 	panic(fmt.Errorf("not implemented: GetUsers - getUsers"))
 }
