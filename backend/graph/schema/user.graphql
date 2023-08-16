@@ -3,8 +3,8 @@ type User {
   user_name: String!
   screen_name: String!
   posts: [Post!]!
-  followers: [User!]!
-  followings: [User!]!
+  # followers: [User!]! @goField(forceResolver: true)
+  # followings: [User!]! @goField(forceResolver: true)
 }
 
 input CreateUserInput {
@@ -19,22 +19,22 @@ input UpdateUserInput {
 
 interface UserPayload {
   user: User
-  errors: [AllError!]
+  error: Error
 }
 
 type CreateUserPayload {
   user: User
-  errors: [AllError!]
+  error: Error
 }
  
 type UpdateUserPayload {
   user: User
-  errors: [AllError!]
+  error: Error
 }
 
 type DeleteUserPayload {
   success: Boolean!
-  errors: [AllError!]
+  error: Error
 }
 
 extend type Mutation {
@@ -48,7 +48,6 @@ extend type Mutation {
 
 type getUserPayload {
   user: User
-  pageInfo: CommonPageInfo!
 }
 
 type getUsersPayload {

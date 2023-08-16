@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -43,7 +42,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Validation func(ctx context.Context, obj interface{}, next graphql.Resolver, format string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -54,13 +52,13 @@ type ComplexityRoot struct {
 	}
 
 	CreatePostPayload struct {
-		Errors func(childComplexity int) int
-		User   func(childComplexity int) int
+		Error func(childComplexity int) int
+		Post  func(childComplexity int) int
 	}
 
 	CreateUserPayload struct {
-		Errors func(childComplexity int) int
-		User   func(childComplexity int) int
+		Error func(childComplexity int) int
+		User  func(childComplexity int) int
 	}
 
 	DeletePostPayload struct {
@@ -69,7 +67,7 @@ type ComplexityRoot struct {
 	}
 
 	DeleteUserPayload struct {
-		Errors  func(childComplexity int) int
+		Error   func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
 
@@ -87,12 +85,9 @@ type ComplexityRoot struct {
 	}
 
 	Post struct {
-		Author    func(childComplexity int) int
-		Content   func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Likes     func(childComplexity int) int
-		Retweets  func(childComplexity int) int
+		Author  func(childComplexity int) int
+		Content func(childComplexity int) int
+		ID      func(childComplexity int) int
 	}
 
 	Query struct {
@@ -103,18 +98,16 @@ type ComplexityRoot struct {
 	}
 
 	UpdatePostPaylod struct {
-		Errors func(childComplexity int) int
-		User   func(childComplexity int) int
+		Error func(childComplexity int) int
+		Post  func(childComplexity int) int
 	}
 
 	UpdateUserPayload struct {
-		Errors func(childComplexity int) int
-		User   func(childComplexity int) int
+		Error func(childComplexity int) int
+		User  func(childComplexity int) int
 	}
 
 	User struct {
-		Followers  func(childComplexity int) int
-		Followings func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Posts      func(childComplexity int) int
 		ScreenName func(childComplexity int) int
@@ -132,8 +125,7 @@ type ComplexityRoot struct {
 	}
 
 	GetUserPayload struct {
-		PageInfo func(childComplexity int) int
-		User     func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	GetUsersPayload struct {
@@ -193,26 +185,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CommonPageInfo.TotalCount(childComplexity), true
 
-	case "CreatePostPayload.errors":
-		if e.complexity.CreatePostPayload.Errors == nil {
+	case "CreatePostPayload.error":
+		if e.complexity.CreatePostPayload.Error == nil {
 			break
 		}
 
-		return e.complexity.CreatePostPayload.Errors(childComplexity), true
+		return e.complexity.CreatePostPayload.Error(childComplexity), true
 
-	case "CreatePostPayload.user":
-		if e.complexity.CreatePostPayload.User == nil {
+	case "CreatePostPayload.post":
+		if e.complexity.CreatePostPayload.Post == nil {
 			break
 		}
 
-		return e.complexity.CreatePostPayload.User(childComplexity), true
+		return e.complexity.CreatePostPayload.Post(childComplexity), true
 
-	case "CreateUserPayload.errors":
-		if e.complexity.CreateUserPayload.Errors == nil {
+	case "CreateUserPayload.error":
+		if e.complexity.CreateUserPayload.Error == nil {
 			break
 		}
 
-		return e.complexity.CreateUserPayload.Errors(childComplexity), true
+		return e.complexity.CreateUserPayload.Error(childComplexity), true
 
 	case "CreateUserPayload.user":
 		if e.complexity.CreateUserPayload.User == nil {
@@ -235,12 +227,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeletePostPayload.Success(childComplexity), true
 
-	case "DeleteUserPayload.errors":
-		if e.complexity.DeleteUserPayload.Errors == nil {
+	case "DeleteUserPayload.error":
+		if e.complexity.DeleteUserPayload.Error == nil {
 			break
 		}
 
-		return e.complexity.DeleteUserPayload.Errors(childComplexity), true
+		return e.complexity.DeleteUserPayload.Error(childComplexity), true
 
 	case "DeleteUserPayload.success":
 		if e.complexity.DeleteUserPayload.Success == nil {
@@ -342,33 +334,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.Content(childComplexity), true
 
-	case "Post.created_at":
-		if e.complexity.Post.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Post.CreatedAt(childComplexity), true
-
 	case "Post.id":
 		if e.complexity.Post.ID == nil {
 			break
 		}
 
 		return e.complexity.Post.ID(childComplexity), true
-
-	case "Post.likes":
-		if e.complexity.Post.Likes == nil {
-			break
-		}
-
-		return e.complexity.Post.Likes(childComplexity), true
-
-	case "Post.retweets":
-		if e.complexity.Post.Retweets == nil {
-			break
-		}
-
-		return e.complexity.Post.Retweets(childComplexity), true
 
 	case "Query.getPost":
 		if e.complexity.Query.GetPost == nil {
@@ -418,26 +389,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetUsers(childComplexity, args["input"].(model.ConnectionInput)), true
 
-	case "UpdatePostPaylod.errors":
-		if e.complexity.UpdatePostPaylod.Errors == nil {
+	case "UpdatePostPaylod.error":
+		if e.complexity.UpdatePostPaylod.Error == nil {
 			break
 		}
 
-		return e.complexity.UpdatePostPaylod.Errors(childComplexity), true
+		return e.complexity.UpdatePostPaylod.Error(childComplexity), true
 
-	case "UpdatePostPaylod.user":
-		if e.complexity.UpdatePostPaylod.User == nil {
+	case "UpdatePostPaylod.post":
+		if e.complexity.UpdatePostPaylod.Post == nil {
 			break
 		}
 
-		return e.complexity.UpdatePostPaylod.User(childComplexity), true
+		return e.complexity.UpdatePostPaylod.Post(childComplexity), true
 
-	case "UpdateUserPayload.errors":
-		if e.complexity.UpdateUserPayload.Errors == nil {
+	case "UpdateUserPayload.error":
+		if e.complexity.UpdateUserPayload.Error == nil {
 			break
 		}
 
-		return e.complexity.UpdateUserPayload.Errors(childComplexity), true
+		return e.complexity.UpdateUserPayload.Error(childComplexity), true
 
 	case "UpdateUserPayload.user":
 		if e.complexity.UpdateUserPayload.User == nil {
@@ -445,20 +416,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UpdateUserPayload.User(childComplexity), true
-
-	case "User.followers":
-		if e.complexity.User.Followers == nil {
-			break
-		}
-
-		return e.complexity.User.Followers(childComplexity), true
-
-	case "User.followings":
-		if e.complexity.User.Followings == nil {
-			break
-		}
-
-		return e.complexity.User.Followings(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -515,13 +472,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GetPostsPayload.Posts(childComplexity), true
-
-	case "getUserPayload.pageInfo":
-		if e.complexity.GetUserPayload.PageInfo == nil {
-			break
-		}
-
-		return e.complexity.GetUserPayload.PageInfo(childComplexity), true
 
 	case "getUserPayload.user":
 		if e.complexity.GetUserPayload.User == nil {
@@ -676,21 +626,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) dir_validation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["format"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["format"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1027,8 +962,8 @@ func (ec *executionContext) fieldContext_CommonPageInfo_hasPreviousPage(ctx cont
 	return fc, nil
 }
 
-func (ec *executionContext) _CreatePostPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CreatePostPayload_user(ctx, field)
+func (ec *executionContext) _CreatePostPayload_post(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatePostPayload_post(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1041,7 +976,7 @@ func (ec *executionContext) _CreatePostPayload_user(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
+		return obj.Post, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1058,7 +993,7 @@ func (ec *executionContext) _CreatePostPayload_user(ctx context.Context, field g
 	return ec.marshalNPost2ᚖbackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CreatePostPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CreatePostPayload_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CreatePostPayload",
 		Field:      field,
@@ -1072,12 +1007,6 @@ func (ec *executionContext) fieldContext_CreatePostPayload_user(ctx context.Cont
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
-			case "likes":
-				return ec.fieldContext_Post_likes(ctx, field)
-			case "retweets":
-				return ec.fieldContext_Post_retweets(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Post_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -1085,8 +1014,8 @@ func (ec *executionContext) fieldContext_CreatePostPayload_user(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _CreatePostPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CreatePostPayload_errors(ctx, field)
+func (ec *executionContext) _CreatePostPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.CreatePostPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatePostPayload_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1099,7 +1028,7 @@ func (ec *executionContext) _CreatePostPayload_errors(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1108,19 +1037,23 @@ func (ec *executionContext) _CreatePostPayload_errors(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.AllError)
+	res := resTmp.(*model.Error)
 	fc.Result = res
-	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+	return ec.marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CreatePostPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CreatePostPayload_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CreatePostPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type AllError does not have child fields")
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Error_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -1170,10 +1103,6 @@ func (ec *executionContext) fieldContext_CreateUserPayload_user(ctx context.Cont
 				return ec.fieldContext_User_screen_name(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1181,8 +1110,8 @@ func (ec *executionContext) fieldContext_CreateUserPayload_user(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _CreateUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CreateUserPayload_errors(ctx, field)
+func (ec *executionContext) _CreateUserPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreateUserPayload_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1195,7 +1124,7 @@ func (ec *executionContext) _CreateUserPayload_errors(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1204,19 +1133,23 @@ func (ec *executionContext) _CreateUserPayload_errors(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.AllError)
+	res := resTmp.(*model.Error)
 	fc.Result = res
-	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+	return ec.marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CreateUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CreateUserPayload_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CreateUserPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type AllError does not have child fields")
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Error_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -1354,8 +1287,8 @@ func (ec *executionContext) fieldContext_DeleteUserPayload_success(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _DeleteUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUserPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DeleteUserPayload_errors(ctx, field)
+func (ec *executionContext) _DeleteUserPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUserPayload_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1368,7 +1301,7 @@ func (ec *executionContext) _DeleteUserPayload_errors(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1377,19 +1310,23 @@ func (ec *executionContext) _DeleteUserPayload_errors(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.AllError)
+	res := resTmp.(*model.Error)
 	fc.Result = res
-	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+	return ec.marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_DeleteUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DeleteUserPayload_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DeleteUserPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type AllError does not have child fields")
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Error_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -1478,10 +1415,10 @@ func (ec *executionContext) fieldContext_Mutation_createPost(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "user":
-				return ec.fieldContext_CreatePostPayload_user(ctx, field)
-			case "errors":
-				return ec.fieldContext_CreatePostPayload_errors(ctx, field)
+			case "post":
+				return ec.fieldContext_CreatePostPayload_post(ctx, field)
+			case "error":
+				return ec.fieldContext_CreatePostPayload_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CreatePostPayload", field.Name)
 		},
@@ -1539,10 +1476,10 @@ func (ec *executionContext) fieldContext_Mutation_updatePost(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "user":
-				return ec.fieldContext_UpdatePostPaylod_user(ctx, field)
-			case "errors":
-				return ec.fieldContext_UpdatePostPaylod_errors(ctx, field)
+			case "post":
+				return ec.fieldContext_UpdatePostPaylod_post(ctx, field)
+			case "error":
+				return ec.fieldContext_UpdatePostPaylod_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UpdatePostPaylod", field.Name)
 		},
@@ -1663,8 +1600,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_CreateUserPayload_user(ctx, field)
-			case "errors":
-				return ec.fieldContext_CreateUserPayload_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_CreateUserPayload_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CreateUserPayload", field.Name)
 		},
@@ -1724,8 +1661,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_UpdateUserPayload_user(ctx, field)
-			case "errors":
-				return ec.fieldContext_UpdateUserPayload_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_UpdateUserPayload_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UpdateUserPayload", field.Name)
 		},
@@ -1785,8 +1722,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteUser(ctx context.Context
 			switch field.Name {
 			case "success":
 				return ec.fieldContext_DeleteUserPayload_success(ctx, field)
-			case "errors":
-				return ec.fieldContext_DeleteUserPayload_errors(ctx, field)
+			case "error":
+				return ec.fieldContext_DeleteUserPayload_error(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DeleteUserPayload", field.Name)
 		},
@@ -1818,32 +1755,8 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.ID, nil
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			format, err := ec.unmarshalNString2string(ctx, "len=36")
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.Validation == nil {
-				return nil, errors.New("directive validation is not implemented")
-			}
-			return ec.directives.Validation(ctx, obj, directive0, format)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1886,32 +1799,8 @@ func (ec *executionContext) _Post_content(ctx context.Context, field graphql.Col
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.Content, nil
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.Validation == nil {
-				return nil, errors.New("directive validation is not implemented")
-			}
-			return ec.directives.Validation(ctx, obj, directive0, format)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1988,172 +1877,8 @@ func (ec *executionContext) fieldContext_Post_author(ctx context.Context, field 
 				return ec.fieldContext_User_screen_name(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Post_likes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Likes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Post_likes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Post",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
-			case "posts":
-				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Post_retweets(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Post_retweets(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Retweets, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Post_retweets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Post",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
-			case "posts":
-				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Post_created_at(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Post_created_at(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Post_created_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Post",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2319,8 +2044,6 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 			switch field.Name {
 			case "user":
 				return ec.fieldContext_getUserPayload_user(ctx, field)
-			case "pageInfo":
-				return ec.fieldContext_getUserPayload_pageInfo(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type getUserPayload", field.Name)
 		},
@@ -2529,8 +2252,8 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _UpdatePostPaylod_user(ctx context.Context, field graphql.CollectedField, obj *model.UpdatePostPaylod) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdatePostPaylod_user(ctx, field)
+func (ec *executionContext) _UpdatePostPaylod_post(ctx context.Context, field graphql.CollectedField, obj *model.UpdatePostPaylod) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatePostPaylod_post(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2543,7 +2266,7 @@ func (ec *executionContext) _UpdatePostPaylod_user(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
+		return obj.Post, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2560,7 +2283,7 @@ func (ec *executionContext) _UpdatePostPaylod_user(ctx context.Context, field gr
 	return ec.marshalNPost2ᚖbackendᚋgraphᚋmodelᚐPost(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UpdatePostPaylod_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UpdatePostPaylod_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UpdatePostPaylod",
 		Field:      field,
@@ -2574,12 +2297,6 @@ func (ec *executionContext) fieldContext_UpdatePostPaylod_user(ctx context.Conte
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
-			case "likes":
-				return ec.fieldContext_Post_likes(ctx, field)
-			case "retweets":
-				return ec.fieldContext_Post_retweets(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Post_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -2587,8 +2304,8 @@ func (ec *executionContext) fieldContext_UpdatePostPaylod_user(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _UpdatePostPaylod_errors(ctx context.Context, field graphql.CollectedField, obj *model.UpdatePostPaylod) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdatePostPaylod_errors(ctx, field)
+func (ec *executionContext) _UpdatePostPaylod_error(ctx context.Context, field graphql.CollectedField, obj *model.UpdatePostPaylod) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatePostPaylod_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2601,7 +2318,7 @@ func (ec *executionContext) _UpdatePostPaylod_errors(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2610,19 +2327,23 @@ func (ec *executionContext) _UpdatePostPaylod_errors(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.AllError)
+	res := resTmp.(*model.Error)
 	fc.Result = res
-	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+	return ec.marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UpdatePostPaylod_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UpdatePostPaylod_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UpdatePostPaylod",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type AllError does not have child fields")
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Error_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -2672,10 +2393,6 @@ func (ec *executionContext) fieldContext_UpdateUserPayload_user(ctx context.Cont
 				return ec.fieldContext_User_screen_name(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2683,8 +2400,8 @@ func (ec *executionContext) fieldContext_UpdateUserPayload_user(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _UpdateUserPayload_errors(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUserPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateUserPayload_errors(ctx, field)
+func (ec *executionContext) _UpdateUserPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUserPayload_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2697,7 +2414,7 @@ func (ec *executionContext) _UpdateUserPayload_errors(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Errors, nil
+		return obj.Error, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2706,19 +2423,23 @@ func (ec *executionContext) _UpdateUserPayload_errors(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.AllError)
+	res := resTmp.(*model.Error)
 	fc.Result = res
-	return ec.marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx, field.Selections, res)
+	return ec.marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UpdateUserPayload_errors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UpdateUserPayload_error(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UpdateUserPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type AllError does not have child fields")
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Error_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
 		},
 	}
 	return fc, nil
@@ -2781,32 +2502,8 @@ func (ec *executionContext) _User_user_name(ctx context.Context, field graphql.C
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.UserName, nil
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.Validation == nil {
-				return nil, errors.New("directive validation is not implemented")
-			}
-			return ec.directives.Validation(ctx, obj, directive0, format)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserName, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2925,130 +2622,8 @@ func (ec *executionContext) fieldContext_User_posts(ctx context.Context, field g
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
-			case "likes":
-				return ec.fieldContext_Post_likes(ctx, field)
-			case "retweets":
-				return ec.fieldContext_Post_retweets(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Post_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_followers(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_followers(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Followers, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_followers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
-			case "posts":
-				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_followings(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_followings(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Followings, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_followings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
-			case "posts":
-				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -4865,12 +4440,6 @@ func (ec *executionContext) fieldContext_getPostPayload_post(ctx context.Context
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
-			case "likes":
-				return ec.fieldContext_Post_likes(ctx, field)
-			case "retweets":
-				return ec.fieldContext_Post_retweets(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Post_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -4972,12 +4541,6 @@ func (ec *executionContext) fieldContext_getPostsPayload_posts(ctx context.Conte
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
-			case "likes":
-				return ec.fieldContext_Post_likes(ctx, field)
-			case "retweets":
-				return ec.fieldContext_Post_retweets(ctx, field)
-			case "created_at":
-				return ec.fieldContext_Post_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -5081,64 +4644,8 @@ func (ec *executionContext) fieldContext_getUserPayload_user(ctx context.Context
 				return ec.fieldContext_User_screen_name(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _getUserPayload_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.GetUserPayload) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_getUserPayload_pageInfo(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.CommonPageInfo)
-	fc.Result = res
-	return ec.marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐCommonPageInfo(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_getUserPayload_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "getUserPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
-			case "hasNextPage":
-				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_CommonPageInfo_hasPreviousPage(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CommonPageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -5191,10 +4698,6 @@ func (ec *executionContext) fieldContext_getUsersPayload_users(ctx context.Conte
 				return ec.fieldContext_User_screen_name(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
-			case "followers":
-				return ec.fieldContext_User_followers(ctx, field)
-			case "followings":
-				return ec.fieldContext_User_followings(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -5334,65 +4837,31 @@ func (ec *executionContext) unmarshalInputCreatePostInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "content"}
+	fieldsInOrder := [...]string{"content", "authorId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "len=36")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
-			if data, ok := tmp.(string); ok {
-				it.ID = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
 		case "content":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.Content = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
+			it.Content = data
+		case "authorId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
 			}
+			it.AuthorID = data
 		}
 	}
 
@@ -5417,56 +4886,20 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_name"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.UserName = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.UserName = data
 		case "screen_name":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=3,max=15")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(*string); ok {
-				it.ScreenName = data
-			} else if tmp == nil {
-				it.ScreenName = nil
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.ScreenName = data
 		}
 	}
 
@@ -5491,28 +4924,11 @@ func (ec *executionContext) unmarshalInputDeletePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "len=36")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.ID = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.ID = data
 		}
 	}
 
@@ -5566,54 +4982,20 @@ func (ec *executionContext) unmarshalInputUpdatePostInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNID2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "len=36")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.ID = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.ID = data
 		case "content":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=1,max=400")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.Content = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.Content = data
 		}
 	}
 
@@ -5638,58 +5020,20 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_name"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(*string); ok {
-				it.UserName = data
-			} else if tmp == nil {
-				it.UserName = nil
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.UserName = data
 		case "screen_name":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
-			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
-			directive1 := func(ctx context.Context) (interface{}, error) {
-				format, err := ec.unmarshalNString2string(ctx, "min=3,max=15")
-				if err != nil {
-					return nil, err
-				}
-				if ec.directives.Validation == nil {
-					return nil, errors.New("directive validation is not implemented")
-				}
-				return ec.directives.Validation(ctx, obj, directive0, format)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(*string); ok {
-				it.ScreenName = data
-			} else if tmp == nil {
-				it.ScreenName = nil
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.ScreenName = data
 		}
 	}
 
@@ -5789,13 +5133,13 @@ func (ec *executionContext) _CreatePostPayload(ctx context.Context, sel ast.Sele
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CreatePostPayload")
-		case "user":
-			out.Values[i] = ec._CreatePostPayload_user(ctx, field, obj)
+		case "post":
+			out.Values[i] = ec._CreatePostPayload_post(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "errors":
-			out.Values[i] = ec._CreatePostPayload_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._CreatePostPayload_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5832,8 +5176,8 @@ func (ec *executionContext) _CreateUserPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("CreateUserPayload")
 		case "user":
 			out.Values[i] = ec._CreateUserPayload_user(ctx, field, obj)
-		case "errors":
-			out.Values[i] = ec._CreateUserPayload_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._CreateUserPayload_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5917,8 +5261,8 @@ func (ec *executionContext) _DeleteUserPayload(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "errors":
-			out.Values[i] = ec._DeleteUserPayload_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._DeleteUserPayload_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6091,21 +5435,6 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "likes":
-			out.Values[i] = ec._Post_likes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "retweets":
-			out.Values[i] = ec._Post_retweets(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "created_at":
-			out.Values[i] = ec._Post_created_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6275,13 +5604,13 @@ func (ec *executionContext) _UpdatePostPaylod(ctx context.Context, sel ast.Selec
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("UpdatePostPaylod")
-		case "user":
-			out.Values[i] = ec._UpdatePostPaylod_user(ctx, field, obj)
+		case "post":
+			out.Values[i] = ec._UpdatePostPaylod_post(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "errors":
-			out.Values[i] = ec._UpdatePostPaylod_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._UpdatePostPaylod_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6318,8 +5647,8 @@ func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("UpdateUserPayload")
 		case "user":
 			out.Values[i] = ec._UpdateUserPayload_user(ctx, field, obj)
-		case "errors":
-			out.Values[i] = ec._UpdateUserPayload_errors(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._UpdateUserPayload_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6371,16 +5700,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "posts":
 			out.Values[i] = ec._User_posts(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "followers":
-			out.Values[i] = ec._User_followers(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "followings":
-			out.Values[i] = ec._User_followings(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6824,11 +6143,6 @@ func (ec *executionContext) _getUserPayload(ctx context.Context, sel ast.Selecti
 			out.Values[i] = graphql.MarshalString("getUserPayload")
 		case "user":
 			out.Values[i] = ec._getUserPayload_user(ctx, field, obj)
-		case "pageInfo":
-			out.Values[i] = ec._getUserPayload_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6899,16 +6213,6 @@ func (ec *executionContext) _getUsersPayload(ctx context.Context, sel ast.Select
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
-
-func (ec *executionContext) marshalNAllError2backendᚋgraphᚋmodelᚐAllError(ctx context.Context, sel ast.SelectionSet, v model.AllError) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._AllError(ctx, sel, v)
-}
 
 func (ec *executionContext) marshalNAllError2ᚕbackendᚋgraphᚋmodelᚐAllError(ctx context.Context, sel ast.SelectionSet, v []model.AllError) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
@@ -7148,21 +6452,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNUpdatePostInput2backendᚋgraphᚋmodelᚐUpdatePostInput(ctx context.Context, v interface{}) (model.UpdatePostInput, error) {
 	res, err := ec.unmarshalInputUpdatePostInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7235,50 +6524,6 @@ func (ec *executionContext) marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUser(ct
 
 	}
 	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalNUser2ᚕᚖbackendᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖbackendᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
 
 	return ret
 }
@@ -7595,53 +6840,6 @@ func (ec *executionContext) marshalOAllError2backendᚋgraphᚋmodelᚐAllError(
 	return ec._AllError(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAllError2ᚕbackendᚋgraphᚋmodelᚐAllErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []model.AllError) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAllError2backendᚋgraphᚋmodelᚐAllError(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7666,6 +6864,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx context.Context, sel ast.SelectionSet, v *model.Error) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Error(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

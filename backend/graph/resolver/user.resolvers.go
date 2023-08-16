@@ -23,28 +23,25 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		input.ScreenName = &screenName
 	}
 
+	var posts []*model.Post
+
 	user := model.User{
 		ID:         id,
 		UserName:   input.UserName,
 		ScreenName: *input.ScreenName,
-		Posts:      []*model.Post{},
-		Followers:  []*model.User{},
-		Followings: []*model.User{},
+		Posts:      posts,
 	}
 
 	if err := r.DB.Create(&user).Error; err == nil {
 		return &model.CreateUserPayload{
-			User: &model.User{},
-			Errors: []model.AllError{
-				model.Error{
-					Message: err.Error(),
-				},
+			User: &user,
+			Error: &model.Error{
+				Message: err.Error(),
 			},
-		}, nil
+		}, err
 	}
 	return &model.CreateUserPayload{
-		User:   &user,
-		Errors: []model.AllError{},
+		User: &user,
 	}, nil
 }
 
@@ -60,10 +57,24 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.ModelInpu
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+	var user model.User
+	err := r.DB.First(&user, input.ID).Error
+
+	return &model.GetUserPayload{
+		User: &user,
+	}, err
 }
 
 // GetUsers is the resolver for the getUsers field.
 func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error) {
-	panic(fmt.Errorf("not implemented: GetUsers - getUsers"))
+	var users []*model.User
+	if err := r.DB.Find(users).Error; err != nil {
+		return &model.GetUsersPayload{
+			Users: users,
+		}, err
+	}
+
+	return &model.GetUsersPayload{
+		Users: users,
+	}, nil
 }

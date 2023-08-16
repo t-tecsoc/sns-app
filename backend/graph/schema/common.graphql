@@ -2,6 +2,9 @@ directive @validation(
   format: String!
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
 
+# build-in directive by Gqlgen
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 scalar Time
 
 type CommonPageInfo {

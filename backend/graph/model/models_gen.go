@@ -2,10 +2,6 @@
 
 package model
 
-import (
-	"time"
-)
-
 type AllError interface {
 	IsAllError()
 }
@@ -13,7 +9,7 @@ type AllError interface {
 type UserPayload interface {
 	IsUserPayload()
 	GetUser() *User
-	GetErrors() []AllError
+	GetError() *Error
 }
 
 type CommonPageInfo struct {
@@ -31,13 +27,13 @@ type ConnectionInput struct {
 }
 
 type CreatePostInput struct {
-	ID      string `json:"id" validate:"len=36"`
-	Content string `json:"content" validate:"min=1,max=400"`
+	Content  string `json:"content" validate:"min=1,max=400"`
+	AuthorID string `json:"authorId"`
 }
 
 type CreatePostPayload struct {
-	User   *Post      `json:"user"`
-	Errors []AllError `json:"errors,omitempty"`
+	Post  *Post  `json:"post"`
+	Error *Error `json:"error,omitempty"`
 }
 
 type CreateUserInput struct {
@@ -46,8 +42,8 @@ type CreateUserInput struct {
 }
 
 type CreateUserPayload struct {
-	User   *User      `json:"user,omitempty"`
-	Errors []AllError `json:"errors,omitempty"`
+	User  *User  `json:"user,omitempty"`
+	Error *Error `json:"error,omitempty"`
 }
 
 type DeletePostInput struct {
@@ -60,8 +56,8 @@ type DeletePostPayload struct {
 }
 
 type DeleteUserPayload struct {
-	Success bool       `json:"success"`
-	Errors  []AllError `json:"errors,omitempty"`
+	Success bool   `json:"success"`
+	Error   *Error `json:"error,omitempty"`
 }
 
 type Error struct {
@@ -75,12 +71,9 @@ type ModelInputID struct {
 }
 
 type Post struct {
-	ID        string    `json:"id" validate:"len=36"`
-	Content   string    `json:"content" validate:"min=1,max=400"`
-	Author    *User     `json:"author"`
-	Likes     []*User   `json:"likes"`
-	Retweets  []*User   `json:"retweets"`
-	CreatedAt time.Time `json:"created_at"`
+	ID      string `json:"id" validate:"len=36"`
+	Content string `json:"content" validate:"min=1,max=400"`
+	Author  *User  `json:"author"`
 }
 
 type UpdatePostInput struct {
@@ -89,8 +82,8 @@ type UpdatePostInput struct {
 }
 
 type UpdatePostPaylod struct {
-	User   *Post      `json:"user"`
-	Errors []AllError `json:"errors,omitempty"`
+	Post  *Post  `json:"post"`
+	Error *Error `json:"error,omitempty"`
 }
 
 type UpdateUserInput struct {
@@ -99,17 +92,15 @@ type UpdateUserInput struct {
 }
 
 type UpdateUserPayload struct {
-	User   *User      `json:"user,omitempty"`
-	Errors []AllError `json:"errors,omitempty"`
+	User  *User  `json:"user,omitempty"`
+	Error *Error `json:"error,omitempty"`
 }
 
 type User struct {
 	ID         string  `json:"id"`
-	UserName   string  `json:"user_name" validate:"min=1,max=30"`
+	UserName   string  `json:"user_name"`
 	ScreenName string  `json:"screen_name"`
 	Posts      []*Post `json:"posts"`
-	Followers  []*User `json:"followers"`
-	Followings []*User `json:"followings"`
 }
 
 type GetPostPayload struct {
@@ -123,8 +114,7 @@ type GetPostsPayload struct {
 }
 
 type GetUserPayload struct {
-	User     *User           `json:"user,omitempty"`
-	PageInfo *CommonPageInfo `json:"pageInfo"`
+	User *User `json:"user,omitempty"`
 }
 
 type GetUsersPayload struct {
