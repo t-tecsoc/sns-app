@@ -4,6 +4,7 @@ import (
 	"backend/db"
 	"backend/graph"
 	"backend/graph/resolver"
+	"backend/graph/validation"
 	"context"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
@@ -85,28 +87,28 @@ func main() {
 
 	database := db.ConnectGORM(dsn)
 
-	config := graph.Config{Resolvers: &resolver.Resolver{
-		DB: database,
-	}}
-	// config?.Directives{
-	// 	Validation: func(ctx context.Context, obj interface{}, next graphql.Resolver, format string) (res interface{}, err error) {
-	// 		errors, err := validation.ValidateModel(ctx)
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
+	config := graph.Config{
+		Resolvers: &resolver.Resolver{
+			DB: database,
+		},
+	}
+	config.Directives.Validation = func(ctx context.Context, obj interface{}, next graphql.Resolver, format string) (res interface{}, err error) {
+		errors, err := validation.ValidateModel(ctx)
+		if err != nil {
+			return nil, err
+		}
 
-	// 		if len(errors) > 0 {
-	// 			log := ""
-	// 			for _, e := range errors {
-	// 				// 改行を入れてlogに追加する
-	// 				log += e + "\n"
-	// 			}
-	// 			return nil, fmt.Errorf(log)
-	// 		}
+		if len(errors) > 0 {
+			log := ""
+			for _, e := range errors {
+				// 改行を入れてlogに追加する
+				log += e + "\n"
+			}
+			return nil, fmt.Errorf(log)
+		}
 
-	// 		return next(ctx)
-	// 	},
-	// }
+		return next(ctx)
+	}
 
 	// Setting up Gin
 	router := gin.Default()
