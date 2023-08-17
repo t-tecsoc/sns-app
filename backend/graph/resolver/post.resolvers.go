@@ -56,7 +56,9 @@ func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInpu
 
 // Author is the resolver for the author field.
 func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: Author - author"))
+	var user model.User
+	err := r.DB.First(&user, obj.Author.ID).Error
+	return &user, err
 }
 
 // GetPost is the resolver for the getPost field.

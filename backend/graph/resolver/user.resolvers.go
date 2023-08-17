@@ -82,7 +82,9 @@ func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInpu
 
 // Posts is the resolver for the posts field.
 func (r *userResolver) Posts(ctx context.Context, obj *model.User) ([]*model.Post, error) {
-	panic(fmt.Errorf("not implemented: Posts - posts"))
+	var posts []*model.Post
+	err := r.DB.Where("authorId = ?", obj.ID).Find(&posts).Error
+	return posts, err
 }
 
 // User returns graph.UserResolver implementation.
