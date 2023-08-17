@@ -1,3 +1,4 @@
+//go:generate go run ../../cmd/gqlgenerate/main.go generate
 package resolver
 
 import "gorm.io/gorm"
