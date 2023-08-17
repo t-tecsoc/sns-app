@@ -54,6 +54,11 @@ func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInpu
 	panic(fmt.Errorf("not implemented: DeletePost - deletePost"))
 }
 
+// Author is the resolver for the author field.
+func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: Author - author"))
+}
+
 // GetPost is the resolver for the getPost field.
 func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error) {
 	var post model.Post
@@ -81,8 +86,12 @@ func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInpu
 // Mutation returns graph.MutationResolver implementation.
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
 
+// Post returns graph.PostResolver implementation.
+func (r *Resolver) Post() graph.PostResolver { return &postResolver{r} }
+
 // Query returns graph.QueryResolver implementation.
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+type postResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

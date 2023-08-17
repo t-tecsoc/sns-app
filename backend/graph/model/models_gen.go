@@ -6,12 +6,6 @@ type AllError interface {
 	IsAllError()
 }
 
-type UserPayload interface {
-	IsUserPayload()
-	GetUser() *User
-	GetError() *Error
-}
-
 type CommonPageInfo struct {
 	TotalCount      int  `json:"totalCount"`
 	HasNextPage     bool `json:"hasNextPage"`
@@ -39,11 +33,6 @@ type CreatePostPayload struct {
 type CreateUserInput struct {
 	UserName   string  `json:"user_name" validate:"min=1,max=30"`
 	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
-}
-
-type CreateUserPayload struct {
-	User  *User  `json:"user,omitempty"`
-	Error *Error `json:"error,omitempty"`
 }
 
 type DeletePostInput struct {
@@ -91,16 +80,16 @@ type UpdateUserInput struct {
 	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
 }
 
-type UpdateUserPayload struct {
-	User  *User  `json:"user,omitempty"`
-	Error *Error `json:"error,omitempty"`
-}
-
 type User struct {
 	ID         string  `json:"id"`
 	UserName   string  `json:"user_name"`
 	ScreenName string  `json:"screen_name"`
 	Posts      []*Post `json:"posts"`
+}
+
+type UserPayload struct {
+	User  *User  `json:"user,omitempty"`
+	Error *Error `json:"error,omitempty"`
 }
 
 type GetPostPayload struct {

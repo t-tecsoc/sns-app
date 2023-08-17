@@ -17,17 +17,9 @@ input UpdateUserInput {
   screen_name: String @validation(format: "min=3,max=15")
 }
 
-interface UserPayload {
-  user: User
-  error: Error
-}
 
-type CreateUserPayload {
-  user: User
-  error: Error
-}
- 
-type UpdateUserPayload {
+
+type UserPayload {
   user: User
   error: Error
 }
@@ -39,9 +31,9 @@ type DeleteUserPayload {
 
 extend type Mutation {
 
-  createUser(input: CreateUserInput!): CreateUserPayload!
+  createUser(input: CreateUserInput!): UserPayload!
 
-  updateUser(input: UpdateUserInput!): UpdateUserPayload!
+  updateUser(input: UpdateUserInput!): UserPayload!
 
   deleteUser(input: ModelInputId!): DeleteUserPayload!
 }
