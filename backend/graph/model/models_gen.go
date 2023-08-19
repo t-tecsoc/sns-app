@@ -60,9 +60,10 @@ type ModelInputID struct {
 }
 
 type Post struct {
-	ID      string `json:"id" validate:"len=36"`
-	Content string `json:"content" validate:"min=1,max=400"`
-	Author  *User  `json:"author"`
+	ID       string `json:"id" validate:"len=36"`
+	Content  string `json:"content" validate:"min=1,max=400"`
+	Author   *User  `json:"author"`
+	AuthorID string `json:"authorId"`
 }
 
 type UpdatePostInput struct {

@@ -26,9 +26,10 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 	}
 	id := uuid.New().String()
 	post := model.Post{
-		ID:      id,
-		Content: input.Content,
-		Author:  &user,
+		ID:       id,
+		Content:  input.Content,
+		Author:   &user,
+		AuthorID: user.ID,
 	}
 
 	if err := r.DB.Create(&post).Error; err == nil {
@@ -56,9 +57,9 @@ func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInpu
 
 // Author is the resolver for the author field.
 func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User, error) {
-	var user model.User
-	err := r.DB.First(&user, obj.Author.ID).Error
-	return &user, err
+	var author model.User
+	err := r.DB.First(&author, obj.AuthorID).Error
+	return &author, err
 }
 
 // GetPost is the resolver for the getPost field.
@@ -74,7 +75,7 @@ func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (
 func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
 	var posts []*model.Post
 	var totalCount int64
-	err := r.DB.Find(posts).Count(&totalCount).Error
+	err := r.DB.Find(&posts).Count(&totalCount).Error
 	return &model.GetPostsPayload{
 		Posts: posts,
 		PageInfo: &model.CommonPageInfo{

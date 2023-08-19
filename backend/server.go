@@ -3,6 +3,7 @@ package main
 import (
 	"backend/db"
 	"backend/graph"
+	"backend/graph/model"
 	"backend/graph/resolver"
 	"backend/graph/validation"
 	"context"
@@ -86,6 +87,7 @@ func main() {
 	)
 
 	database := db.ConnectGORM(dsn)
+	database.AutoMigrate(&model.User{}, &model.Post{})
 
 	config := graph.Config{
 		Resolvers: &resolver.Resolver{

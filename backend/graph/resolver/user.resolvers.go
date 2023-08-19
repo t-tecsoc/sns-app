@@ -9,9 +9,11 @@ import (
 	"backend/graph/model"
 	"backend/module"
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -83,8 +85,11 @@ func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInpu
 // Posts is the resolver for the posts field.
 func (r *userResolver) Posts(ctx context.Context, obj *model.User) ([]*model.Post, error) {
 	var posts []*model.Post
-	err := r.DB.Where("authorId = ?", obj.ID).Find(&posts).Error
-	return posts, err
+	err := r.DB.Find(&posts, model.Post{AuthorID: obj.ID}).Error
+	if err != nil || errors.Is(err, gorm.ErrRecordNotFound) {
+		return posts, nil
+	}
+	return nil, err
 }
 
 // User returns graph.UserResolver implementation.

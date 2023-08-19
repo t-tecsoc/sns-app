@@ -83,9 +83,10 @@ type ComplexityRoot struct {
 	}
 
 	Post struct {
-		Author  func(childComplexity int) int
-		Content func(childComplexity int) int
-		ID      func(childComplexity int) int
+		Author   func(childComplexity int) int
+		AuthorID func(childComplexity int) int
+		Content  func(childComplexity int) int
+		ID       func(childComplexity int) int
 	}
 
 	Query struct {
@@ -316,6 +317,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Post.Author(childComplexity), true
+
+	case "Post.authorId":
+		if e.complexity.Post.AuthorID == nil {
+			break
+		}
+
+		return e.complexity.Post.AuthorID(childComplexity), true
 
 	case "Post.content":
 		if e.complexity.Post.Content == nil {
@@ -1012,6 +1020,8 @@ func (ec *executionContext) fieldContext_CreatePostPayload_post(ctx context.Cont
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_Post_authorId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -1841,6 +1851,50 @@ func (ec *executionContext) fieldContext_Post_author(ctx context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Post_authorId(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Post_authorId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AuthorID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Post_authorId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getPost(ctx, field)
 	if err != nil {
@@ -2254,6 +2308,8 @@ func (ec *executionContext) fieldContext_UpdatePostPaylod_post(ctx context.Conte
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_Post_authorId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -2483,6 +2539,8 @@ func (ec *executionContext) fieldContext_User_posts(ctx context.Context, field g
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_Post_authorId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -4397,6 +4455,8 @@ func (ec *executionContext) fieldContext_getPostPayload_post(ctx context.Context
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_Post_authorId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -4498,6 +4558,8 @@ func (ec *executionContext) fieldContext_getPostsPayload_posts(ctx context.Conte
 				return ec.fieldContext_Post_content(ctx, field)
 			case "author":
 				return ec.fieldContext_Post_author(ctx, field)
+			case "authorId":
+				return ec.fieldContext_Post_authorId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Post", field.Name)
 		},
@@ -5518,6 +5580,11 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "authorId":
+			out.Values[i] = ec._Post_authorId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
