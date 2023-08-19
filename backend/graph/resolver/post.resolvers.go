@@ -7,6 +7,7 @@ package resolver
 import (
 	"backend/graph"
 	"backend/graph/model"
+	"backend/module"
 	"context"
 	"fmt"
 
@@ -76,6 +77,10 @@ func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInpu
 	var posts []*model.Post
 	var totalCount int64
 	err := r.DB.Find(&posts).Count(&totalCount).Error
+	if module.IsRrrorExcludeNoneRecord(err) {
+		return nil, err
+	}
+
 	return &model.GetPostsPayload{
 		Posts: posts,
 		PageInfo: &model.CommonPageInfo{
@@ -83,7 +88,7 @@ func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInpu
 			HasNextPage:     false,
 			HasPreviousPage: false,
 		},
-	}, err
+	}, nil
 }
 
 // Mutation returns graph.MutationResolver implementation.

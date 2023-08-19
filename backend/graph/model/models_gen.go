@@ -99,7 +99,7 @@ type GetPostPayload struct {
 }
 
 type GetPostsPayload struct {
-	Posts    []*Post         `json:"posts,omitempty"`
+	Posts    []*Post         `json:"posts"`
 	PageInfo *CommonPageInfo `json:"pageInfo"`
 }
 

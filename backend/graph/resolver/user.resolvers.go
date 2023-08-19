@@ -9,11 +9,9 @@ import (
 	"backend/graph/model"
 	"backend/module"
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -26,13 +24,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		input.ScreenName = &screenName
 	}
 
-	var posts []*model.Post
+	// var posts []*model.Post
 
 	user := model.User{
 		ID:         id,
 		UserName:   input.UserName,
 		ScreenName: *input.ScreenName,
-		Posts:      posts,
+		// Posts:      posts,
 	}
 
 	if err := r.DB.Create(&user).Error; err == nil {
@@ -86,10 +84,10 @@ func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInpu
 func (r *userResolver) Posts(ctx context.Context, obj *model.User) ([]*model.Post, error) {
 	var posts []*model.Post
 	err := r.DB.Find(&posts, model.Post{AuthorID: obj.ID}).Error
-	if err != nil || errors.Is(err, gorm.ErrRecordNotFound) {
-		return posts, nil
+	if module.IsRrrorExcludeNoneRecord(err) {
+		return nil, err
 	}
-	return nil, err
+	return posts, nil
 }
 
 // User returns graph.UserResolver implementation.

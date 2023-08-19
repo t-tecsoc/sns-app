@@ -43,7 +43,7 @@ extend type Mutation {
 }
 
 type getPostsPayload {
-  posts: [Post!]
+  posts: [Post!]!
   pageInfo: CommonPageInfo!
 }
 
