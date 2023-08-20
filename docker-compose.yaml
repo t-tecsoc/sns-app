@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   db:
     build:
@@ -16,6 +15,8 @@ services:
       - type: bind
         source: ./db/logs
         target: /var/log
+    networks:
+      - sns_app
   backend:
     build:
       context: .
@@ -32,3 +33,7 @@ services:
     depends_on:
       db:
         condition: service_started
+    networks:
+      - sns_app
+networks:
+  sns_app:
