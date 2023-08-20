@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"backend/graph"
+	"backend/graph/loader"
 	"backend/graph/model"
 	"backend/module"
 	"context"
@@ -83,9 +84,8 @@ func (r *queryResolver) Users(ctx context.Context, input *model.ConnectionInput)
 
 // Posts is the resolver for the posts field.
 func (r *userResolver) Posts(ctx context.Context, obj *model.User) ([]*model.Post, error) {
-	var posts []*model.Post
-	err := r.DB.Find(&posts, model.Post{AuthorID: obj.ID}).Error
-	if module.IsErrorExcludeNoneRecord(err) {
+	posts, err := loader.LoadPosts(ctx, obj.ID)
+	if err != nil {
 		return nil, err
 	}
 	return posts, nil

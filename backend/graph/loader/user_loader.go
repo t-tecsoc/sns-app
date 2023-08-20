@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/graph-gophers/dataloader"
+	"github.com/graph-gophers/dataloader/v7"
 	"gorm.io/gorm"
 )
 
@@ -14,16 +14,12 @@ type UserLoader struct {
 	DB *gorm.DB
 }
 
-func (u *UserLoader) BatchGetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
-	userIDs := make([]string, len(keys))
-	for i, key := range keys {
-		userIDs[i] = key.String()
-	}
+func (u *UserLoader) BatchGetUsers(ctx context.Context, userIDs []string) []*dataloader.Result[*model.User] {
 	usersTemp := []*model.User{}
 	if err := u.DB.Find(&usersTemp, "id IN ?", userIDs).Error; err != nil {
 		err := fmt.Errorf("fail get users, %w", err)
 		log.Printf("%v\n", err)
-		return nil
+		panic(err)
 	}
 
 	usersByUserId := map[string]*model.User{}
@@ -36,21 +32,20 @@ func (u *UserLoader) BatchGetUsers(ctx context.Context, keys dataloader.Keys) []
 		users[i] = usersByUserId[id]
 	}
 
-	output := make([]*dataloader.Result, len(userIDs))
+	result := make([]*dataloader.Result[*model.User], len(userIDs))
 	for index := range userIDs {
 		user := users[index]
-		output[index] = &dataloader.Result{Data: user, Error: nil}
+		result[index] = &dataloader.Result[*model.User]{Data: user, Error: nil}
 	}
-	return output
+	return result
 }
 
-// dataloader.Loadをwrapして型づけした実装
 func LoadUser(ctx context.Context, userID string) (*model.User, error) {
 	loaders := GetLoaders(ctx)
-	thunk := loaders.UserLoader.Load(ctx, dataloader.StringKey(userID))
+	thunk := loaders.UserLoader.Load(ctx, userID)
 	result, err := thunk()
 	if err != nil {
 		return nil, err
 	}
-	return result.(*model.User), nil
+	return result, nil
 }

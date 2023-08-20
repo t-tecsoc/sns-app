@@ -1,10 +1,11 @@
 package loader
 
 import (
+	"backend/graph/model"
 	"context"
 
 	"github.com/gin-gonic/gin"
-	"github.com/graph-gophers/dataloader"
+	"github.com/graph-gophers/dataloader/v7"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,8 @@ const (
 
 // Loaders 各DataLoaderを取りまとめるstruct
 type Loaders struct {
-	UserLoader *dataloader.Loader
+	UserLoader *dataloader.Loader[string, *model.User]
+	PostLoader *dataloader.Loader[string, []*model.Post]
 }
 
 func NewLoaders(db *gorm.DB) *Loaders {
@@ -24,10 +26,17 @@ func NewLoaders(db *gorm.DB) *Loaders {
 	userLoader := &UserLoader{
 		DB: db,
 	}
+	postLoader := &PostLoader{
+		DB: db,
+	}
 	loaders := &Loaders{
 		UserLoader: dataloader.NewBatchedLoader(
 			userLoader.BatchGetUsers,
-			dataloader.WithClearCacheOnBatch(),
+			dataloader.WithClearCacheOnBatch[string, *model.User](),
+		),
+		PostLoader: dataloader.NewBatchedLoader(
+			postLoader.BatchGetPosts,
+			dataloader.WithClearCacheOnBatch[string, []*model.Post](),
 		),
 	}
 	return loaders
