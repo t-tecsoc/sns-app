@@ -77,15 +77,15 @@ type UpdatePostPaylod struct {
 }
 
 type UpdateUserInput struct {
-	UserName   *string `json:"user_name,omitempty" validate:"min=1,max=30"`
-	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
+	UserName   *string `json:"userName,omitempty" validate:"min=1,max=30"`
+	ScreenName *string `json:"screenName,omitempty" validate:"min=3,max=15"`
 }
 
 type User struct {
 	ID         string  `json:"id"`
-	UserName   string  `json:"user_name"`
-	ScreenName string  `json:"screen_name"`
-	Posts      []*Post `json:"posts"`
+	UserName   string  `json:"userName"`
+	ScreenName string  `json:"screenName"`
+	Posts      []*Post `json:"posts" gorm:"foreignKey:AuthorId;references:ID"`
 }
 
 type UserPayload struct {

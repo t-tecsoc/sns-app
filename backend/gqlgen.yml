@@ -89,15 +89,6 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.Time
 
-  User:
-    fields:
-      posts:
-        resolver: true
-  Post:
-    fields:
-      author:
-        resolver: true
-
-# directives:
-#   validation:
-#     skip_runtime: true
+directives:
+  customTag:
+    skip_runtime: true

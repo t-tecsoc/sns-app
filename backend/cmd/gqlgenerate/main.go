@@ -20,10 +20,8 @@ func main() {
 
 	// Attaching the mutation function onto modelgen plugin
 	p := modelgen.Plugin{
-		FieldHook:  customhook.ValidationFieldHook,
-		MutateHook: customhook.ForeignKeyFieldHook,
+		FieldHook: customhook.FieldHook,
 	}
-
 	err = api.Generate(cfg, api.ReplacePlugin(&p))
 
 	if err != nil {

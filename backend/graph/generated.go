@@ -415,14 +415,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Posts(childComplexity), true
 
-	case "User.screen_name":
+	case "User.screenName":
 		if e.complexity.User.ScreenName == nil {
 			break
 		}
 
 		return e.complexity.User.ScreenName(childComplexity), true
 
-	case "User.user_name":
+	case "User.userName":
 		if e.complexity.User.UserName == nil {
 			break
 		}
@@ -1838,10 +1838,10 @@ func (ec *executionContext) fieldContext_Post_author(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
+			case "userName":
+				return ec.fieldContext_User_userName(ctx, field)
+			case "screenName":
+				return ec.fieldContext_User_screenName(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
 			}
@@ -2406,8 +2406,8 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _User_user_name(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_user_name(ctx, field)
+func (ec *executionContext) _User_userName(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_userName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2437,7 +2437,7 @@ func (ec *executionContext) _User_user_name(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_user_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_userName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -2450,8 +2450,8 @@ func (ec *executionContext) fieldContext_User_user_name(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_screen_name(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_screen_name(ctx, field)
+func (ec *executionContext) _User_screenName(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_screenName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2481,7 +2481,7 @@ func (ec *executionContext) _User_screen_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_screen_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_screenName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -2586,10 +2586,10 @@ func (ec *executionContext) fieldContext_UserPayload_user(ctx context.Context, f
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
+			case "userName":
+				return ec.fieldContext_User_userName(ctx, field)
+			case "screenName":
+				return ec.fieldContext_User_screenName(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
 			}
@@ -4660,10 +4660,10 @@ func (ec *executionContext) fieldContext_getUserPayload_user(ctx context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
+			case "userName":
+				return ec.fieldContext_User_userName(ctx, field)
+			case "screenName":
+				return ec.fieldContext_User_screenName(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
 			}
@@ -4714,10 +4714,10 @@ func (ec *executionContext) fieldContext_getUsersPayload_users(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "user_name":
-				return ec.fieldContext_User_user_name(ctx, field)
-			case "screen_name":
-				return ec.fieldContext_User_screen_name(ctx, field)
+			case "userName":
+				return ec.fieldContext_User_userName(ctx, field)
+			case "screenName":
+				return ec.fieldContext_User_screenName(ctx, field)
 			case "posts":
 				return ec.fieldContext_User_posts(ctx, field)
 			}
@@ -5135,17 +5135,17 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"user_name", "screen_name"}
+	fieldsInOrder := [...]string{"userName", "screenName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "user_name":
+		case "userName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_name"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userName"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
 				format, err := ec.unmarshalNString2string(ctx, "min=1,max=30")
@@ -5170,10 +5170,10 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
-		case "screen_name":
+		case "screenName":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screenName"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
 				format, err := ec.unmarshalNString2string(ctx, "min=3,max=15")
@@ -5803,13 +5803,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "user_name":
-			out.Values[i] = ec._User_user_name(ctx, field, obj)
+		case "userName":
+			out.Values[i] = ec._User_userName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "screen_name":
-			out.Values[i] = ec._User_screen_name(ctx, field, obj)
+		case "screenName":
+			out.Values[i] = ec._User_screenName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

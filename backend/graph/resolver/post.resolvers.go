@@ -19,7 +19,6 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 	var user model.User
 	if err := r.DB.First(&user, input.AuthorID).Error; err != nil {
 		return &model.CreatePostPayload{
-			Post: &model.Post{},
 			Error: &model.Error{
 				Message: err.Error(),
 			},

@@ -87,6 +87,8 @@ func main() {
 	)
 
 	database := db.ConnectGORM(dsn)
+	// database.Logger = database.Logger.LogMode(logger.Info)
+
 	database.AutoMigrate(&model.User{}, &model.Post{})
 
 	config := graph.Config{

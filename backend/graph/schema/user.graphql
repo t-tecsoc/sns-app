@@ -1,8 +1,8 @@
 type User {
   id: ID!
-  user_name: String!
-  screen_name: String!
-  posts: [Post!]!
+  userName: String!
+  screenName: String!
+  posts: [Post!]! @goField(forceResolver: true) @customTag(key: "gorm", value: "foreignKey-AuthorId;references-ID")
   # followers: [User!]! @goField(forceResolver: true)
   # followings: [User!]! @goField(forceResolver: true)
 }
@@ -13,8 +13,8 @@ input CreateUserInput {
 }
 
 input UpdateUserInput {
-  user_name: String @validation(format: "min=1,max=30")
-  screen_name: String @validation(format: "min=3,max=15")
+  userName: String @validation(format: "min=1,max=30")
+  screenName: String @validation(format: "min=3,max=15")
 }
 
 
