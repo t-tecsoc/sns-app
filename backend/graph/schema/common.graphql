@@ -7,7 +7,6 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 scalar Time
 
 type CommonPageInfo {
-  totalCount: Int!
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
 }

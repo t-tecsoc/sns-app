@@ -13,7 +13,6 @@ type ListGetter interface {
 }
 
 type CommonPageInfo struct {
-	TotalCount      int  `json:"totalCount"`
 	HasNextPage     bool `json:"hasNextPage"`
 	HasPreviousPage bool `json:"hasPreviousPage"`
 }

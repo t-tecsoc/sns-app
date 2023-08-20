@@ -74,8 +74,7 @@ func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (
 // GetPosts is the resolver for the getPosts field.
 func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
 	var posts []*model.Post
-	var totalCount int64
-	err := r.DB.Find(&posts).Count(&totalCount).Error
+	err := r.DB.Find(&posts).Error
 	if module.IsErrorExcludeNoneRecord(err) {
 		return &model.GetPostsPayload{
 			Error: &model.Error{
@@ -87,7 +86,6 @@ func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInpu
 	return &model.GetPostsPayload{
 		Posts: posts,
 		PageInfo: &model.CommonPageInfo{
-			TotalCount:      int(totalCount),
 			HasNextPage:     false,
 			HasPreviousPage: false,
 		},

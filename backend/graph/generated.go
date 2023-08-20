@@ -51,7 +51,6 @@ type ComplexityRoot struct {
 	CommonPageInfo struct {
 		HasNextPage     func(childComplexity int) int
 		HasPreviousPage func(childComplexity int) int
-		TotalCount      func(childComplexity int) int
 	}
 
 	CreatePostPayload struct {
@@ -184,13 +183,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CommonPageInfo.HasPreviousPage(childComplexity), true
-
-	case "CommonPageInfo.totalCount":
-		if e.complexity.CommonPageInfo.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.CommonPageInfo.TotalCount(childComplexity), true
 
 	case "CreatePostPayload.error":
 		if e.complexity.CreatePostPayload.Error == nil {
@@ -858,50 +850,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
-
-func (ec *executionContext) _CommonPageInfo_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CommonPageInfo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_CommonPageInfo_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CommonPageInfo",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _CommonPageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.CommonPageInfo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
@@ -4523,8 +4471,6 @@ func (ec *executionContext) fieldContext_getPostPayload_pageInfo(ctx context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
 				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
 			case "hasPreviousPage":
@@ -4623,8 +4569,6 @@ func (ec *executionContext) fieldContext_getPostsPayload_pageInfo(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
 				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
 			case "hasPreviousPage":
@@ -4819,8 +4763,6 @@ func (ec *executionContext) fieldContext_getUsersPayload_pageInfo(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_CommonPageInfo_totalCount(ctx, field)
 			case "hasNextPage":
 				return ec.fieldContext_CommonPageInfo_hasNextPage(ctx, field)
 			case "hasPreviousPage":
@@ -5362,11 +5304,6 @@ func (ec *executionContext) _CommonPageInfo(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CommonPageInfo")
-		case "totalCount":
-			out.Values[i] = ec._CommonPageInfo_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "hasNextPage":
 			out.Values[i] = ec._CommonPageInfo_hasNextPage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6643,21 +6580,6 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
