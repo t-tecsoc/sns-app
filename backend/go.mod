@@ -13,8 +13,6 @@ require (
 	gorm.io/gorm v1.25.4
 )
 
-require github.com/opentracing/opentracing-go v1.2.0 // indirect
-
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
