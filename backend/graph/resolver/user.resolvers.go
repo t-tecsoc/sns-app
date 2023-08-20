@@ -66,7 +66,7 @@ func (r *queryResolver) User(ctx context.Context, input model.ModelInputID) (*mo
 }
 
 // Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error) {
+func (r *queryResolver) Users(ctx context.Context, input *model.ConnectionInput) (*model.GetUsersPayload, error) {
 	var users []*model.User
 	if err := r.DB.Find(&users).Error; err != nil {
 		return &model.GetUsersPayload{

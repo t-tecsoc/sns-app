@@ -55,5 +55,5 @@ type getPostPayload {
 
 extend type Query {
   post(input: ModelInputID!): getPostPayload
-  posts(input: ConnectionInput!): getPostsPayload!
+  posts(input: ConnectionInput): getPostsPayload!
 }

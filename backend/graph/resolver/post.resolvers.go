@@ -72,7 +72,7 @@ func (r *queryResolver) Post(ctx context.Context, input model.ModelInputID) (*mo
 }
 
 // Posts is the resolver for the posts field.
-func (r *queryResolver) Posts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
+func (r *queryResolver) Posts(ctx context.Context, input *model.ConnectionInput) (*model.GetPostsPayload, error) {
 	var posts []*model.Post
 	err := r.DB.Find(&posts).Error
 	if module.IsErrorExcludeNoneRecord(err) {

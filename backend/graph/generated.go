@@ -90,9 +90,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Post  func(childComplexity int, input model.ModelInputID) int
-		Posts func(childComplexity int, input model.ConnectionInput) int
+		Posts func(childComplexity int, input *model.ConnectionInput) int
 		User  func(childComplexity int, input model.ModelInputID) int
-		Users func(childComplexity int, input model.ConnectionInput) int
+		Users func(childComplexity int, input *model.ConnectionInput) int
 	}
 
 	UpdatePostPaylod struct {
@@ -147,9 +147,9 @@ type PostResolver interface {
 }
 type QueryResolver interface {
 	Post(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error)
-	Posts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error)
+	Posts(ctx context.Context, input *model.ConnectionInput) (*model.GetPostsPayload, error)
 	User(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error)
-	Users(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error)
+	Users(ctx context.Context, input *model.ConnectionInput) (*model.GetUsersPayload, error)
 }
 type UserResolver interface {
 	Posts(ctx context.Context, obj *model.User) ([]*model.Post, error)
@@ -355,7 +355,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Posts(childComplexity, args["input"].(model.ConnectionInput)), true
+		return e.complexity.Query.Posts(childComplexity, args["input"].(*model.ConnectionInput)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -379,7 +379,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Users(childComplexity, args["input"].(model.ConnectionInput)), true
+		return e.complexity.Query.Users(childComplexity, args["input"].(*model.ConnectionInput)), true
 
 	case "UpdatePostPaylod.error":
 		if e.complexity.UpdatePostPaylod.Error == nil {
@@ -771,10 +771,10 @@ func (ec *executionContext) field_Query_post_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_posts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ConnectionInput
+	var arg0 *model.ConnectionInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
+		arg0, err = ec.unmarshalOConnectionInput2ᚖbackendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -801,10 +801,10 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ConnectionInput
+	var arg0 *model.ConnectionInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
+		arg0, err = ec.unmarshalOConnectionInput2ᚖbackendᚋgraphᚋmodelᚐConnectionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1931,7 +1931,7 @@ func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Posts(rctx, fc.Args["input"].(model.ConnectionInput))
+		return ec.resolvers.Query().Posts(rctx, fc.Args["input"].(*model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2053,7 +2053,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx, fc.Args["input"].(model.ConnectionInput))
+		return ec.resolvers.Query().Users(rctx, fc.Args["input"].(*model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6516,11 +6516,6 @@ func (ec *executionContext) marshalNCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐ
 	return ec._CommonPageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNConnectionInput2backendᚋgraphᚋmodelᚐConnectionInput(ctx context.Context, v interface{}) (model.ConnectionInput, error) {
-	res, err := ec.unmarshalInputConnectionInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNCreatePostInput2backendᚋgraphᚋmodelᚐCreatePostInput(ctx context.Context, v interface{}) (model.CreatePostInput, error) {
 	res, err := ec.unmarshalInputCreatePostInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7047,6 +7042,14 @@ func (ec *executionContext) marshalOCommonPageInfo2ᚖbackendᚋgraphᚋmodelᚐ
 		return graphql.Null
 	}
 	return ec._CommonPageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOConnectionInput2ᚖbackendᚋgraphᚋmodelᚐConnectionInput(ctx context.Context, v interface{}) (*model.ConnectionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputConnectionInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOError2ᚖbackendᚋgraphᚋmodelᚐError(ctx context.Context, sel ast.SelectionSet, v *model.Error) graphql.Marshaler {
