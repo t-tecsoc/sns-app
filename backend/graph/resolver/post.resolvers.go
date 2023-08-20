@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"backend/graph"
+	"backend/graph/loader"
 	"backend/graph/model"
 	"backend/module"
 	"context"
@@ -57,9 +58,11 @@ func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInpu
 
 // Author is the resolver for the author field.
 func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User, error) {
-	var author model.User
-	err := r.DB.First(&author, "id = ?", obj.AuthorID).Error
-	return &author, err
+	user, err := loader.LoadUser(ctx, obj.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // Post is the resolver for the post field.

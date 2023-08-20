@@ -7,5 +7,5 @@ import (
 )
 
 func IsErrorExcludeNoneRecord(err error) bool {
-	return err == nil && errors.Is(err, gorm.ErrRecordNotFound)
+	return err != nil && !errors.Is(err, gorm.ErrRecordNotFound)
 }

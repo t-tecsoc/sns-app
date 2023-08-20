@@ -3,6 +3,7 @@ package main
 import (
 	"backend/db"
 	"backend/graph"
+	"backend/graph/loader"
 	"backend/graph/model"
 	"backend/graph/resolver"
 	"backend/graph/validation"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm/logger"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -49,21 +51,6 @@ func GinContextToContextMiddleware() gin.HandlerFunc {
 	}
 }
 
-func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
-	ginContext := ctx.Value("GinContextKey")
-	if ginContext == nil {
-		err := fmt.Errorf("could not retrieve gin.Context")
-		return nil, err
-	}
-
-	gc, ok := ginContext.(*gin.Context)
-	if !ok {
-		err := fmt.Errorf("gin.Context has wrong type")
-		return nil, err
-	}
-	return gc, nil
-}
-
 func loadEnv() error {
 	err := godotenv.Load("../.env")
 	return err
@@ -86,14 +73,16 @@ func main() {
 		os.Getenv("POSTGRES_PORT"),
 	)
 
-	database := db.ConnectGORM(dsn)
-	// database.Logger = database.Logger.LogMode(logger.Info)
+	DB := db.ConnectGORM(dsn)
+	// loaderの初期化
+	ldrs := loader.NewLoaders(DB)
+	DB.Logger = DB.Logger.LogMode(logger.Info)
 
-	database.AutoMigrate(&model.User{}, &model.Post{})
+	DB.AutoMigrate(&model.User{}, &model.Post{})
 
 	config := graph.Config{
 		Resolvers: &resolver.Resolver{
-			DB: database,
+			DB: DB,
 		},
 	}
 	config.Directives.Validation = func(ctx context.Context, obj interface{}, next graphql.Resolver, format string) (res interface{}, err error) {
@@ -117,7 +106,8 @@ func main() {
 	// Setting up Gin
 	router := gin.Default()
 	router.Use(GinContextToContextMiddleware())
-	router.POST("/query", graphqlHandler(config))
+	srv := graphqlHandler(config)
+	router.POST("/query", loader.Middleware(ldrs, srv))
 
 	if gin.Mode() != gin.ReleaseMode {
 		router.GET("/", playgroundHandler())

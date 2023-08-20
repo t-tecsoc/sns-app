@@ -13,6 +13,8 @@ require (
 	gorm.io/gorm v1.25.4
 )
 
+require github.com/opentracing/opentracing-go v1.2.0 // indirect
+
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -25,6 +27,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/graph-gophers/dataloader v5.0.0+incompatible
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
