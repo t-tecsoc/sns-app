@@ -65,7 +65,7 @@ func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User
 // Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error) {
 	var post model.Post
-	err := r.DB.First(&post, input.ID).Error
+	err := r.DB.First(&post, "id = ?", input.ID).Error
 	return &model.GetPostPayload{
 		Post: &post,
 	}, err

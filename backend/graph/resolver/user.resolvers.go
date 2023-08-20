@@ -58,7 +58,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.ModelInpu
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error) {
 	var user model.User
-	err := r.DB.First(&user, input.ID).Error
+	err := r.DB.First(&user, "id = ?", input.ID).Error
 
 	return &model.GetUserPayload{
 		User: &user,
