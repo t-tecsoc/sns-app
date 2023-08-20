@@ -55,8 +55,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, input model.ModelInpu
 	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
 }
 
-// GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error) {
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error) {
 	var user model.User
 	err := r.DB.First(&user, input.ID).Error
 
@@ -65,8 +65,8 @@ func (r *queryResolver) GetUser(ctx context.Context, input model.ModelInputID) (
 	}, err
 }
 
-// GetUsers is the resolver for the getUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error) {
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error) {
 	var users []*model.User
 	if err := r.DB.Find(&users).Error; err != nil {
 		return &model.GetUsersPayload{

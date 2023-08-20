@@ -62,8 +62,8 @@ func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User
 	return &author, err
 }
 
-// GetPost is the resolver for the getPost field.
-func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error) {
+// Post is the resolver for the post field.
+func (r *queryResolver) Post(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error) {
 	var post model.Post
 	err := r.DB.First(&post, input.ID).Error
 	return &model.GetPostPayload{
@@ -71,8 +71,8 @@ func (r *queryResolver) GetPost(ctx context.Context, input model.ModelInputID) (
 	}, err
 }
 
-// GetPosts is the resolver for the getPosts field.
-func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
+// Posts is the resolver for the posts field.
+func (r *queryResolver) Posts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error) {
 	var posts []*model.Post
 	err := r.DB.Find(&posts).Error
 	if module.IsErrorExcludeNoneRecord(err) {

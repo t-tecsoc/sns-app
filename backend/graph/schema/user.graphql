@@ -47,7 +47,6 @@ type getUsersPayload  implements ListGetter {
 }
 
 extend type Query {
-  getUser(input: ModelInputID!) :getUserPayload!
-
-  getUsers(input: ConnectionInput!): getUsersPayload!
+  user(input: ModelInputID!) :getUserPayload!
+  users(input: ConnectionInput!): getUsersPayload!
 }

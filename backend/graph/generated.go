@@ -89,10 +89,10 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetPost  func(childComplexity int, input model.ModelInputID) int
-		GetPosts func(childComplexity int, input model.ConnectionInput) int
-		GetUser  func(childComplexity int, input model.ModelInputID) int
-		GetUsers func(childComplexity int, input model.ConnectionInput) int
+		Post  func(childComplexity int, input model.ModelInputID) int
+		Posts func(childComplexity int, input model.ConnectionInput) int
+		User  func(childComplexity int, input model.ModelInputID) int
+		Users func(childComplexity int, input model.ConnectionInput) int
 	}
 
 	UpdatePostPaylod struct {
@@ -146,10 +146,10 @@ type PostResolver interface {
 	Author(ctx context.Context, obj *model.Post) (*model.User, error)
 }
 type QueryResolver interface {
-	GetPost(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error)
-	GetPosts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error)
-	GetUser(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error)
-	GetUsers(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error)
+	Post(ctx context.Context, input model.ModelInputID) (*model.GetPostPayload, error)
+	Posts(ctx context.Context, input model.ConnectionInput) (*model.GetPostsPayload, error)
+	User(ctx context.Context, input model.ModelInputID) (*model.GetUserPayload, error)
+	Users(ctx context.Context, input model.ConnectionInput) (*model.GetUsersPayload, error)
 }
 type UserResolver interface {
 	Posts(ctx context.Context, obj *model.User) ([]*model.Post, error)
@@ -333,53 +333,53 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.ID(childComplexity), true
 
-	case "Query.getPost":
-		if e.complexity.Query.GetPost == nil {
+	case "Query.post":
+		if e.complexity.Query.Post == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getPost_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_post_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPost(childComplexity, args["input"].(model.ModelInputID)), true
+		return e.complexity.Query.Post(childComplexity, args["input"].(model.ModelInputID)), true
 
-	case "Query.getPosts":
-		if e.complexity.Query.GetPosts == nil {
+	case "Query.posts":
+		if e.complexity.Query.Posts == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getPosts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_posts_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPosts(childComplexity, args["input"].(model.ConnectionInput)), true
+		return e.complexity.Query.Posts(childComplexity, args["input"].(model.ConnectionInput)), true
 
-	case "Query.getUser":
-		if e.complexity.Query.GetUser == nil {
+	case "Query.user":
+		if e.complexity.Query.User == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getUser_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUser(childComplexity, args["input"].(model.ModelInputID)), true
+		return e.complexity.Query.User(childComplexity, args["input"].(model.ModelInputID)), true
 
-	case "Query.getUsers":
-		if e.complexity.Query.GetUsers == nil {
+	case "Query.users":
+		if e.complexity.Query.Users == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getUsers_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_users_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUsers(childComplexity, args["input"].(model.ConnectionInput)), true
+		return e.complexity.Query.Users(childComplexity, args["input"].(model.ConnectionInput)), true
 
 	case "UpdatePostPaylod.error":
 		if e.complexity.UpdatePostPaylod.Error == nil {
@@ -753,7 +753,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getPost_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_post_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.ModelInputID
@@ -768,7 +768,7 @@ func (ec *executionContext) field_Query_getPost_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getPosts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_posts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.ConnectionInput
@@ -783,7 +783,7 @@ func (ec *executionContext) field_Query_getPosts_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.ModelInputID
@@ -798,7 +798,7 @@ func (ec *executionContext) field_Query_getUser_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 model.ConnectionInput
@@ -1859,8 +1859,8 @@ func (ec *executionContext) fieldContext_Post_authorID(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPost(ctx, field)
+func (ec *executionContext) _Query_post(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_post(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1873,7 +1873,7 @@ func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPost(rctx, fc.Args["input"].(model.ModelInputID))
+		return ec.resolvers.Query().Post(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1887,7 +1887,7 @@ func (ec *executionContext) _Query_getPost(ctx context.Context, field graphql.Co
 	return ec.marshalOgetPostPayload2ᚖbackendᚋgraphᚋmodelᚐGetPostPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getPost(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_post(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1910,15 +1910,15 @@ func (ec *executionContext) fieldContext_Query_getPost(ctx context.Context, fiel
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPost_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_post_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getPosts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPosts(ctx, field)
+func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_posts(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1931,7 +1931,7 @@ func (ec *executionContext) _Query_getPosts(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPosts(rctx, fc.Args["input"].(model.ConnectionInput))
+		return ec.resolvers.Query().Posts(rctx, fc.Args["input"].(model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1948,7 +1948,7 @@ func (ec *executionContext) _Query_getPosts(ctx context.Context, field graphql.C
 	return ec.marshalNgetPostsPayload2ᚖbackendᚋgraphᚋmodelᚐGetPostsPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getPosts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_posts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1973,15 +1973,15 @@ func (ec *executionContext) fieldContext_Query_getPosts(ctx context.Context, fie
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPosts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_posts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getUser(ctx, field)
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_user(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1994,7 +1994,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUser(rctx, fc.Args["input"].(model.ModelInputID))
+		return ec.resolvers.Query().User(rctx, fc.Args["input"].(model.ModelInputID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2011,7 +2011,7 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	return ec.marshalNgetUserPayload2ᚖbackendᚋgraphᚋmodelᚐGetUserPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2032,15 +2032,15 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getUsers(ctx, field)
+func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_users(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2053,7 +2053,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUsers(rctx, fc.Args["input"].(model.ConnectionInput))
+		return ec.resolvers.Query().Users(rctx, fc.Args["input"].(model.ConnectionInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2070,7 +2070,7 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 	return ec.marshalNgetUsersPayload2ᚖbackendᚋgraphᚋmodelᚐGetUsersPayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2095,7 +2095,7 @@ func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, fie
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_users_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5690,7 +5690,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getPost":
+		case "post":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5699,7 +5699,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getPost(ctx, field)
+				res = ec._Query_post(ctx, field)
 				return res
 			}
 
@@ -5709,7 +5709,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getPosts":
+		case "posts":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5718,7 +5718,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getPosts(ctx, field)
+				res = ec._Query_posts(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -5731,7 +5731,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getUser":
+		case "user":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5740,7 +5740,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getUser(ctx, field)
+				res = ec._Query_user(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -5753,7 +5753,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getUsers":
+		case "users":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -5762,7 +5762,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getUsers(ctx, field)
+				res = ec._Query_users(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
