@@ -1,23 +1,21 @@
 type User {
-  id: ID!
+  ID: ID!
   userName: String!
   screenName: String!
-  posts: [Post!]! @goField(forceResolver: true) @customTag(key: "gorm", value: "foreignKey-AuthorId;references-ID")
+  posts: [Post!]! @goField(forceResolver: true) @customTag(key: "gorm", value: "foreignKey-AuthorID")
   # followers: [User!]! @goField(forceResolver: true)
   # followings: [User!]! @goField(forceResolver: true)
 }
 
 input CreateUserInput {
-  user_name: String! @validation(format: "min=1,max=30")
-  screen_name: String @validation(format: "min=3,max=15")
+  userName: String! @validation(format: "min=1,max=30")
+  screenName: String @validation(format: "min=3,max=15")
 }
 
 input UpdateUserInput {
   userName: String @validation(format: "min=1,max=30")
   screenName: String @validation(format: "min=3,max=15")
 }
-
-
 
 type UserPayload {
   user: User
@@ -35,20 +33,21 @@ extend type Mutation {
 
   updateUser(input: UpdateUserInput!): UserPayload!
 
-  deleteUser(input: ModelInputId!): DeleteUserPayload!
+  deleteUser(input: ModelInputID!): DeleteUserPayload!
 }
 
 type getUserPayload {
   user: User
 }
 
-type getUsersPayload {
-  users: [User]!
-  pageInfo: CommonPageInfo!
+type getUsersPayload  implements ListGetter {
+  users: [User!]
+  pageInfo: CommonPageInfo
+  Error: Error
 }
 
 extend type Query {
-  getUser(input: ModelInputId!) :getUserPayload!
+  getUser(input: ModelInputID!) :getUserPayload!
 
   getUsers(input: ConnectionInput!): getUsersPayload!
 }

@@ -26,6 +26,11 @@ type Error {
 
 union AllError = Error
 
-input ModelInputId {
-  id: ID!
+input ModelInputID {
+   ID: ID!
+}
+
+interface ListGetter {
+  pageInfo: CommonPageInfo
+  Error: Error
 }

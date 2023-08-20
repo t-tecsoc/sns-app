@@ -74,7 +74,7 @@ func main() {
 	err := loadEnv()
 
 	if err != nil {
-		fmt.Printf(".envファイルを読み込み出来ませんでした: %v", err)
+		fmt.Printf(".envファイルを読み込み出来ませんでした\n %v", err)
 		return
 	}
 	dsn := fmt.Sprintf(

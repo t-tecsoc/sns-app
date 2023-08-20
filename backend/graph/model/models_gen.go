@@ -6,6 +6,12 @@ type AllError interface {
 	IsAllError()
 }
 
+type ListGetter interface {
+	IsListGetter()
+	GetPageInfo() *CommonPageInfo
+	GetError() *Error
+}
+
 type CommonPageInfo struct {
 	TotalCount      int  `json:"totalCount"`
 	HasNextPage     bool `json:"hasNextPage"`
@@ -22,7 +28,7 @@ type ConnectionInput struct {
 
 type CreatePostInput struct {
 	Content  string `json:"content" validate:"min=1,max=400"`
-	AuthorID string `json:"authorId"`
+	AuthorID string `json:"authorID"`
 }
 
 type CreatePostPayload struct {
@@ -31,12 +37,12 @@ type CreatePostPayload struct {
 }
 
 type CreateUserInput struct {
-	UserName   string  `json:"user_name" validate:"min=1,max=30"`
-	ScreenName *string `json:"screen_name,omitempty" validate:"min=3,max=15"`
+	UserName   string  `json:"userName" validate:"min=1,max=30"`
+	ScreenName *string `json:"screenName,omitempty" validate:"min=3,max=15"`
 }
 
 type DeletePostInput struct {
-	ID string `json:"id" validate:"len=36"`
+	ID *string `json:"ID,omitempty" validate:"len=36"`
 }
 
 type DeletePostPayload struct {
@@ -56,18 +62,18 @@ type Error struct {
 func (Error) IsAllError() {}
 
 type ModelInputID struct {
-	ID string `json:"id"`
+	ID string `json:"ID"`
 }
 
 type Post struct {
-	ID       string `json:"id" validate:"len=36"`
+	ID       string `json:"ID" validate:"len=36"`
 	Content  string `json:"content" validate:"min=1,max=400"`
 	Author   *User  `json:"author"`
-	AuthorID string `json:"authorId"`
+	AuthorID string `json:"authorID"`
 }
 
 type UpdatePostInput struct {
-	ID      string `json:"id" validate:"len=36"`
+	ID      string `json:"ID" validate:"len=36"`
 	Content string `json:"content" validate:"min=1,max=400"`
 }
 
@@ -82,10 +88,10 @@ type UpdateUserInput struct {
 }
 
 type User struct {
-	ID         string  `json:"id"`
+	ID         string  `json:"ID"`
 	UserName   string  `json:"userName"`
 	ScreenName string  `json:"screenName"`
-	Posts      []*Post `json:"posts" gorm:"foreignKey:AuthorId;references:ID"`
+	Posts      []*Post `json:"posts" gorm:"foreignKey:AuthorID"`
 }
 
 type UserPayload struct {
@@ -99,15 +105,25 @@ type GetPostPayload struct {
 }
 
 type GetPostsPayload struct {
-	Posts    []*Post         `json:"posts"`
-	PageInfo *CommonPageInfo `json:"pageInfo"`
+	Posts    []*Post         `json:"posts,omitempty"`
+	PageInfo *CommonPageInfo `json:"pageInfo,omitempty"`
+	Error    *Error          `json:"Error,omitempty"`
 }
+
+func (GetPostsPayload) IsListGetter()                     {}
+func (this GetPostsPayload) GetPageInfo() *CommonPageInfo { return this.PageInfo }
+func (this GetPostsPayload) GetError() *Error             { return this.Error }
 
 type GetUserPayload struct {
 	User *User `json:"user,omitempty"`
 }
 
 type GetUsersPayload struct {
-	Users    []*User         `json:"users"`
-	PageInfo *CommonPageInfo `json:"pageInfo"`
+	Users    []*User         `json:"users,omitempty"`
+	PageInfo *CommonPageInfo `json:"pageInfo,omitempty"`
+	Error    *Error          `json:"Error,omitempty"`
 }
+
+func (GetUsersPayload) IsListGetter()                     {}
+func (this GetUsersPayload) GetPageInfo() *CommonPageInfo { return this.PageInfo }
+func (this GetUsersPayload) GetError() *Error             { return this.Error }

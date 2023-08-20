@@ -6,6 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func IsRrrorExcludeNoneRecord(err error) bool {
+func IsErrorExcludeNoneRecord(err error) bool {
 	return err == nil && errors.Is(err, gorm.ErrRecordNotFound)
 }

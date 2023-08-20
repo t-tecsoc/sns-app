@@ -17,7 +17,7 @@ import (
 // CreatePost is the resolver for the createPost field.
 func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePostInput) (*model.CreatePostPayload, error) {
 	var user model.User
-	if err := r.DB.First(&user, input.AuthorID).Error; err != nil {
+	if err := r.DB.First(&user, "id = ?", input.AuthorID).Error; err != nil {
 		return &model.CreatePostPayload{
 			Error: &model.Error{
 				Message: err.Error(),
@@ -32,7 +32,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 		AuthorID: user.ID,
 	}
 
-	if err := r.DB.Create(&post).Error; err == nil {
+	if err := r.DB.Create(&post).Error; err != nil {
 		return &model.CreatePostPayload{
 			Post: &post,
 			Error: &model.Error{
@@ -58,7 +58,7 @@ func (r *mutationResolver) DeletePost(ctx context.Context, input model.ModelInpu
 // Author is the resolver for the author field.
 func (r *postResolver) Author(ctx context.Context, obj *model.Post) (*model.User, error) {
 	var author model.User
-	err := r.DB.First(&author, obj.AuthorID).Error
+	err := r.DB.First(&author, "id = ?", obj.AuthorID).Error
 	return &author, err
 }
 
@@ -76,8 +76,12 @@ func (r *queryResolver) GetPosts(ctx context.Context, input model.ConnectionInpu
 	var posts []*model.Post
 	var totalCount int64
 	err := r.DB.Find(&posts).Count(&totalCount).Error
-	if module.IsRrrorExcludeNoneRecord(err) {
-		return nil, err
+	if module.IsErrorExcludeNoneRecord(err) {
+		return &model.GetPostsPayload{
+			Error: &model.Error{
+				Message: err.Error(),
+			},
+		}, err
 	}
 
 	return &model.GetPostsPayload{
