@@ -1,13 +1,22 @@
 version: '3.9'
 services:
   db:
+    container_name: "PostgreSQL-DB"
     build:
       context: .
       dockerfile: ./docker/postgresql/Dockerfile
     env_file:
       - .env
+    hostname: ${POSTGRES_HOST_NAME}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "${DB_CONNECTONI_PORT}:${POSTGRES_PORT}"
+    networks:
+      - app_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - type: bind
         source: ./db/postgres
@@ -15,14 +24,16 @@ services:
       - type: bind
         source: ./db/logs
         target: /var/log
-    networks:
-      - sns_app
   backend:
+    container_name: "Gin-Go-Backend-Server"
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
     ports:
       - "${BACKEND_PORT}:8080"
+    hostname: ${BACKEND_HOSTNAME}
+    networks:
+      - app_net
     volumes:
       - type: bind
         source: "./backend"
@@ -32,8 +43,6 @@ services:
         target: "/app/.env"
     depends_on:
       db:
-        condition: service_started
-    networks:
-      - sns_app
+        condition: service_healthy
 networks:
-  sns_app:
+  app_net:
