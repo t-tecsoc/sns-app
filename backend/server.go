@@ -70,7 +70,7 @@ func main() {
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB"),
-		os.Getenv("DB_CONNECTONI_PORT"),
+		os.Getenv("DB_CONNECTION_PORT"),
 	)
 
 	DB := db.ConnectGORM(dsn)
@@ -112,6 +112,6 @@ func main() {
 	if gin.Mode() != gin.ReleaseMode {
 		router.GET("/", playgroundHandler())
 	}
-	var addr = fmt.Sprintf("%s:%s", os.Getenv("BACKEND_HOSTNAME"), os.Getenv("BACKEND_PORT"))
+	var addr = fmt.Sprintf("%s:%s", os.Getenv("BACKEND_HOSTNAME"), os.Getenv("BACKEND_CONTAINER_PORT"))
 	router.Run(addr)
 }

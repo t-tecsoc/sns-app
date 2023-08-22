@@ -9,7 +9,7 @@ services:
       - .env
     hostname: ${POSTGRES_HOST_NAME}
     ports:
-      - "${DB_CONNECTONI_PORT}:${POSTGRES_PORT}"
+      - "${DB_CONNECTION_PORT}:${POSTGRES_PORT}"
     networks:
       - app_net
     healthcheck:
@@ -17,20 +17,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - type: bind
-        source: ./db/postgres
-        target: /var/lib/postgresql/data
-      - type: bind
-        source: ./db/logs
-        target: /var/log
+    # volumes:
+    #   - type: bind
+    #     source: ./db/postgres
+    #     target: /var/lib/postgresql/data
+    #   - type: bind
+    #     source: ./db/logs
+    #     target: /var/log
   backend:
     container_name: "Gin-Go-Backend-Server"
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
     ports:
-      - "${BACKEND_PORT}:8080"
+      - "${BACKEND_CONNECTON_PORT}:${BACKEND_CONTAINER_PORT}"
     hostname: ${BACKEND_HOSTNAME}
     networks:
       - app_net
