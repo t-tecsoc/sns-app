@@ -17,13 +17,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # volumes:
-    #   - type: bind
-    #     source: ./db/postgres
-    #     target: /var/lib/postgresql/data
-    #   - type: bind
-    #     source: ./db/logs
-    #     target: /var/log
+    volumes:
+      - type: bind
+        source: ./db/postgres
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: ./db/logs
+        target: /var/log
   backend:
     container_name: "Gin-Go-Backend-Server"
     build:
